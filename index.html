@@ -6,29 +6,58 @@
   <meta name="theme-color" content="#166534">
   <title>FarmOS Lite – Poultry Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/umd/index.js"></script>
+  <!-- React 17 (more stable with CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/react@17.0.2/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@17.0.2/umd/react-dom.development.js"></script>
   <style>
-    body { background: #f0fdf4; }
+    body { background: #f0fdf4; margin: 0; font-family: system-ui, -apple-system, sans-serif; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #e4e4e4; border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: #166534; border-radius: 4px; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; padding: 8px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 20; }
+    .bottom-nav button { background: none; border: none; padding: 8px 12px; border-radius: 12px; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; }
+    .bottom-nav button.active { background: #dcfce7; color: #166534; }
+    input, button { font-family: inherit; }
   </style>
 </head>
-<body class="bg-green-50 text-gray-800 pb-20">
+<body>
   <div id="root"></div>
 
   <script>
-    // Extract globals
+    // Get React globals
     const { useState, useEffect, createContext, useContext, useReducer } = React;
-    const dateFns = window.dateFns;
-    const { format, startOfWeek, endOfWeek, eachDayOfInterval, subDays, isAfter } = dateFns;
+    const ReactDOM = window.ReactDOM;
 
-    // --- Storage Key ---
+    // ---------- Simple date helpers (no external library) ----------
+    const formatDate = (date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const today = () => formatDate(new Date());
+    const getWeekDays = () => {
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 sun, 1 mon...
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        days.push(formatDate(d));
+      }
+      return days;
+    };
+    const isWithinLast7Days = (dateStr) => {
+      const date = new Date(dateStr);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return date >= sevenDaysAgo;
+    };
+
+    // ---------- Storage ----------
     const STORAGE_KEY = 'farmos_data';
-
-    // --- Initial State ---
     const initialState = {
       farmParams: {
         birdCount: 100,
@@ -43,7 +72,6 @@
       mortalityEntries: [],
     };
 
-    // --- Reducer ---
     const farmReducer = (state, action) => {
       switch (action.type) {
         case 'UPDATE_FARM_PARAMS': return { ...state, farmParams: { ...state.farmParams, ...action.payload } };
@@ -58,11 +86,9 @@
       }
     };
 
-    // --- Context ---
     const FarmContext = createContext(null);
     const useFarm = () => useContext(FarmContext);
 
-    // --- Provider with localStorage ---
     const FarmProvider = ({ children }) => {
       const [state, dispatch] = useReducer(farmReducer, initialState, () => {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -72,7 +98,7 @@
       return React.createElement(FarmContext.Provider, { value: { state, dispatch }, children });
     };
 
-    // --- Helper Components (all using React.createElement) ---
+    // ---------- Components (all using React.createElement) ----------
     const UpgradePrompt = () => 
       React.createElement('div', { className: "bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4 shadow-sm" },
         React.createElement('div', { className: "flex items-start gap-3" },
@@ -133,11 +159,10 @@
       const totalFeedCost = dailyFeedKg * farmParams.cycleDays * costPerKg;
       const revenue = finalBirds * farmParams.sellingPrice;
       const profit = revenue - totalFeedCost;
-      const sevenDaysAgo = subDays(new Date(), 7);
-      const recentEggs = eggEntries.filter(entry => isAfter(new Date(entry.date), sevenDaysAgo));
+      const recentEggs = eggEntries.filter(entry => isWithinLast7Days(entry.date));
       const avgDailyEggs = recentEggs.length ? recentEggs.reduce((s, e) => s + e.count, 0) / recentEggs.length : 0;
       const eggRate = finalBirds > 0 ? (avgDailyEggs / finalBirds) * 100 : 0;
-      const lastWeekDeaths = mortalityEntries.filter(e => isAfter(new Date(e.date), sevenDaysAgo)).reduce((s, e) => s + e.deaths, 0);
+      const lastWeekDeaths = mortalityEntries.filter(e => isWithinLast7Days(e.date)).reduce((s, e) => s + e.deaths, 0);
       return React.createElement('div', { className: "space-y-5" },
         React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "Farm Overview"),
         React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
@@ -184,13 +209,21 @@
       const profit = (finalBirds * params.sellingPrice) - totalFeedCost;
       
       const inputs = ['birdCount','feedPerBirdGrams','bagCost','bagWeightKg','sellingPrice','cycleDays'];
+      const labels = {
+        birdCount: 'Number of Birds',
+        feedPerBirdGrams: 'Feed/Bird/Day (g)',
+        bagCost: 'Bag Cost ($)',
+        bagWeightKg: 'Bag Weight (kg)',
+        sellingPrice: 'Selling Price ($/bird)',
+        cycleDays: 'Cycle Length (days)'
+      };
       return React.createElement('div', { className: "space-y-5" },
         React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "Feed & Profit Calculator"),
         React.createElement('div', { className: "bg-white rounded-xl shadow-sm p-5 space-y-4" },
           React.createElement('div', { className: "grid grid-cols-1 sm:grid-cols-2 gap-4" },
             inputs.map(key => 
               React.createElement('div', { key },
-                React.createElement('label', { className: "block text-sm font-medium text-gray-600" }, key.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase())),
+                React.createElement('label', { className: "block text-sm font-medium text-gray-600" }, labels[key]),
                 React.createElement('input', { type: "number", value: params[key], onChange: e => handleChange(key, +e.target.value), className: "mt-1 w-full border rounded-lg p-2" })
               )
             ),
@@ -213,15 +246,12 @@
 
     const EggTracker = () => {
       const { state, dispatch } = useFarm();
-      const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+      const [date, setDate] = useState(today());
       const [count, setCount] = useState(0);
       const add = () => { if(count>0) dispatch({ type:'ADD_EGG_ENTRY', payload:{ id:crypto.randomUUID(), date, count } }); setCount(0); };
       const del = id => dispatch({ type:'DELETE_EGG_ENTRY', payload:id });
-      const now = new Date();
-      const weekStart = startOfWeek(now, { weekStartsOn:1 });
-      const weekEnd = endOfWeek(now, { weekStartsOn:1 });
-      const days = eachDayOfInterval({ start:weekStart, end:weekEnd });
-      const summary = days.map(day => ({ day:format(day,'EEE'), eggs:state.eggEntries.find(e=>e.date===format(day,'yyyy-MM-dd'))?.count||0 }));
+      const weekDays = getWeekDays();
+      const summary = weekDays.map(d => ({ day: new Date(d).toLocaleDateString('en-US', { weekday: 'short' }), eggs: state.eggEntries.find(e=>e.date===d)?.count || 0 }));
       const totalEggs = summary.reduce((s,i)=>s+i.eggs,0);
       const totalDeaths = state.mortalityEntries.reduce((s,m)=>s+m.deaths,0);
       const currentBirds = Math.max(0, state.farmParams.birdCount - totalDeaths);
@@ -263,7 +293,7 @@
 
     const HatchTracker = () => {
       const { state, dispatch } = useFarm();
-      const [date, setDate] = useState(format(new Date(),'yyyy-MM-dd'));
+      const [date, setDate] = useState(today());
       const [eggsSet, setEggsSet] = useState(0);
       const [eggsHatched, setHatched] = useState(0);
       const add = () => { if(eggsSet>0) dispatch({ type:'ADD_HATCH_ENTRY', payload:{ id:crypto.randomUUID(), date, eggsSet, eggsHatched } }); setEggsSet(0); setHatched(0); };
@@ -297,13 +327,12 @@
 
     const MortalityTracker = () => {
       const { state, dispatch } = useFarm();
-      const [date, setDate] = useState(format(new Date(),'yyyy-MM-dd'));
+      const [date, setDate] = useState(today());
       const [deaths, setDeaths] = useState(0);
       const add = () => { if(deaths>0) dispatch({ type:'ADD_MORTALITY_ENTRY', payload:{ id:crypto.randomUUID(), date, deaths } }); setDeaths(0); };
       const del = id => dispatch({ type:'DELETE_MORTALITY_ENTRY', payload:id });
       const totalDeaths = state.mortalityEntries.reduce((s,e)=>s+e.deaths,0);
-      const sevenAgo = subDays(new Date(),7);
-      const recent = state.mortalityEntries.filter(e=>isAfter(new Date(e.date), sevenAgo)).reduce((s,e)=>s+e.deaths,0);
+      const recent = state.mortalityEntries.filter(e=>isWithinLast7Days(e.date)).reduce((s,e)=>s+e.deaths,0);
       return React.createElement('div', { className: "space-y-5" },
         React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "📉 Mortality Tracker"),
         React.createElement('div', { className: "bg-white rounded-xl p-4 flex flex-wrap gap-3 items-end" },
@@ -333,28 +362,27 @@
       );
     };
 
-    // --- Main App with Tabs ---
     const App = () => {
       const [tab, setTab] = useState('dashboard');
       const components = { dashboard: Dashboard, feed: FeedCalculator, eggs: EggTracker, hatch: HatchTracker, mortality: MortalityTracker };
-      const CurrentComponent = components[tab];
+      const Current = components[tab];
       const icons = { dashboard:'📊', feed:'🍗', eggs:'🥚', hatch:'🐣', mortality:'📉' };
       const labels = { dashboard:'Farm', feed:'Feed', eggs:'Eggs', hatch:'Hatch', mortality:'Mortality' };
       return React.createElement(FarmProvider, null,
-        React.createElement('div', { className: "min-h-screen bg-green-50 pb-20" },
+        React.createElement('div', { className: "min-h-screen bg-green-50 pb-24" },
           React.createElement('header', { className: "bg-green-800 text-white p-4 shadow-md sticky top-0 z-10" },
             React.createElement('h1', { className: "text-xl font-bold text-center" }, "🌾 FarmOS Lite"),
             React.createElement('p', { className: "text-xs text-center text-green-200" }, "Poultry & Quail Management")
           ),
           React.createElement('main', { className: "p-4 max-w-4xl mx-auto" },
-            React.createElement(CurrentComponent, null),
+            React.createElement(Current, null),
             React.createElement(DataManagement, null)
           ),
-          React.createElement('nav', { className: "fixed bottom-0 left-0 right-0 bg-white border-t border-green-200 flex justify-around py-2 shadow-lg" },
+          React.createElement('div', { className: "bottom-nav" },
             ['dashboard','feed','eggs','hatch','mortality'].map(t => 
-              React.createElement('button', { key: t, onClick: () => setTab(t), className: `flex flex-col items-center p-2 rounded-lg transition ${tab === t ? 'text-green-700 bg-green-100' : 'text-gray-500'}` },
-                React.createElement('span', { className: "text-xl" }, icons[t]),
-                React.createElement('span', { className: "text-xs" }, labels[t])
+              React.createElement('button', { key: t, onClick: () => setTab(t), className: tab === t ? 'active' : '' },
+                React.createElement('span', { style: { fontSize: '1.5rem' } }, icons[t]),
+                React.createElement('span', null, labels[t])
               )
             )
           )
@@ -362,7 +390,8 @@
       );
     };
 
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+    // Mount using ReactDOM.render (React 17)
+    ReactDOM.render(React.createElement(App), document.getElementById('root'));
   </script>
 </body>
 </html>

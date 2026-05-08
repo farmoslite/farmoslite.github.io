@@ -4,41 +4,63 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#166534">
-  <title>FarmOS Lite – Poultry Management</title>
+  <title>FarmOS Lite – Professional Farm Management</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React 17 (more stable with CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/react@17.0.2/umd/react.development.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@17.0.2/umd/react-dom.development.js"></script>
+  <!-- React 18 -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { background: #f0fdf4; margin: 0; font-family: system-ui, -apple-system, sans-serif; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #e4e4e4; border-radius: 4px; }
+    /* Custom styles for dark mode transitions */
+    * {
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+    }
+    .sidebar-transition {
+      transition: transform 0.3s ease-in-out;
+    }
+    @media (max-width: 768px) {
+      .sidebar-hidden {
+        transform: translateX(-100%);
+      }
+      .sidebar-visible {
+        transform: translateX(0);
+      }
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: #166534; border-radius: 4px; }
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; padding: 8px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 20; }
-    .bottom-nav button { background: none; border: none; padding: 8px 12px; border-radius: 12px; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; }
-    .bottom-nav button.active { background: #dcfce7; color: #166534; }
-    input, button { font-family: inherit; }
+    ::-webkit-scrollbar-thumb:hover { background: #14532d; }
+    .dark ::-webkit-scrollbar-track { background: #1f2937; }
+    .dark ::-webkit-scrollbar-thumb { background: #059669; }
   </style>
 </head>
-<body>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors">
   <div id="root"></div>
 
   <script>
-    // Get React globals
-    const { useState, useEffect, createContext, useContext, useReducer } = React;
-    const ReactDOM = window.ReactDOM;
-
-    // ---------- Simple date helpers (no external library) ----------
+    // --------------------------------------------
+    // COMPLETE FARMOS LITE - MODULAR SINGLE FILE
+    // --------------------------------------------
+    
+    const { useState, useEffect, createContext, useContext, useReducer, useCallback, useMemo, lazy, Suspense } = React;
+    const ReactDOM = ReactDOM;
+    
+    // ==================== UTILITIES ====================
+    
+    // Date helpers
     const formatDate = (date) => {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      const d = new Date(date);
+      return d.toISOString().split('T')[0];
     };
     const today = () => formatDate(new Date());
     const getWeekDays = () => {
       const now = new Date();
-      const dayOfWeek = now.getDay(); // 0 sun, 1 mon...
+      const dayOfWeek = now.getDay();
       const monday = new Date(now);
       monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
       const days = [];
@@ -49,16 +71,81 @@
       }
       return days;
     };
-    const isWithinLast7Days = (dateStr) => {
+    const isWithinLastNDays = (dateStr, days) => {
       const date = new Date(dateStr);
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      return date >= sevenDaysAgo;
+      const nDaysAgo = new Date();
+      nDaysAgo.setDate(nDaysAgo.getDate() - days);
+      return date >= nDaysAgo;
     };
-
-    // ---------- Storage ----------
-    const STORAGE_KEY = 'farmos_data';
-    const initialState = {
+    
+    // Storage utility
+    const STORAGE_KEYS = {
+      FARM_DATA: 'farmos_farm_data',
+      SETTINGS: 'farmos_settings',
+    };
+    
+    const storage = {
+      get: (key, defaultValue) => {
+        try {
+          const item = localStorage.getItem(key);
+          return item ? JSON.parse(item) : defaultValue;
+        } catch { return defaultValue; }
+      },
+      set: (key, value) => {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+          return true;
+        } catch { return false; }
+      },
+    };
+    
+    // Farm presets
+    const FARM_PRESETS = {
+      broilers: {
+        name: 'Broilers',
+        birdCount: 500,
+        feedPerBirdGrams: 150,
+        bagCost: 25,
+        bagWeightKg: 25,
+        sellingPrice: 8,
+        cycleDays: 42,
+        eggProduction: false,
+      },
+      layers: {
+        name: 'Layers',
+        birdCount: 200,
+        feedPerBirdGrams: 120,
+        bagCost: 25,
+        bagWeightKg: 25,
+        sellingPrice: 6,
+        cycleDays: 365,
+        eggProduction: true,
+      },
+      quails: {
+        name: 'Quails',
+        birdCount: 1000,
+        feedPerBirdGrams: 30,
+        bagCost: 20,
+        bagWeightKg: 25,
+        sellingPrice: 2,
+        cycleDays: 45,
+        eggProduction: true,
+      },
+      turkeys: {
+        name: 'Turkeys',
+        birdCount: 100,
+        feedPerBirdGrams: 300,
+        bagCost: 35,
+        bagWeightKg: 25,
+        sellingPrice: 25,
+        cycleDays: 120,
+        eggProduction: false,
+      },
+    };
+    
+    // ==================== TYPES & INITIAL STATES ====================
+    
+    const initialFarmState = {
       farmParams: {
         birdCount: 100,
         feedPerBirdGrams: 120,
@@ -66,139 +153,403 @@
         bagWeightKg: 25,
         sellingPrice: 5,
         cycleDays: 60,
+        farmType: 'layers',
       },
       eggEntries: [],
       hatchEntries: [],
       mortalityEntries: [],
     };
-
+    
+    const initialSettings = {
+      currency: '$',
+      theme: 'light',
+      farmType: 'layers',
+    };
+    
+    // ==================== REDUCERS ====================
+    
     const farmReducer = (state, action) => {
       switch (action.type) {
-        case 'UPDATE_FARM_PARAMS': return { ...state, farmParams: { ...state.farmParams, ...action.payload } };
-        case 'ADD_EGG_ENTRY': return { ...state, eggEntries: [...state.eggEntries, action.payload] };
-        case 'DELETE_EGG_ENTRY': return { ...state, eggEntries: state.eggEntries.filter(e => e.id !== action.payload) };
-        case 'ADD_HATCH_ENTRY': return { ...state, hatchEntries: [...state.hatchEntries, action.payload] };
-        case 'DELETE_HATCH_ENTRY': return { ...state, hatchEntries: state.hatchEntries.filter(h => h.id !== action.payload) };
-        case 'ADD_MORTALITY_ENTRY': return { ...state, mortalityEntries: [...state.mortalityEntries, action.payload] };
-        case 'DELETE_MORTALITY_ENTRY': return { ...state, mortalityEntries: state.mortalityEntries.filter(m => m.id !== action.payload) };
-        case 'IMPORT_DATA': return action.payload;
-        default: return state;
+        case 'UPDATE_FARM_PARAMS':
+          return { ...state, farmParams: { ...state.farmParams, ...action.payload } };
+        case 'APPLY_PRESET':
+          return { ...state, farmParams: { ...state.farmParams, ...action.payload, farmType: action.payload.farmType } };
+        case 'ADD_EGG_ENTRY':
+          return { ...state, eggEntries: [...state.eggEntries, action.payload] };
+        case 'DELETE_EGG_ENTRY':
+          return { ...state, eggEntries: state.eggEntries.filter(e => e.id !== action.payload) };
+        case 'ADD_HATCH_ENTRY':
+          return { ...state, hatchEntries: [...state.hatchEntries, action.payload] };
+        case 'DELETE_HATCH_ENTRY':
+          return { ...state, hatchEntries: state.hatchEntries.filter(h => h.id !== action.payload) };
+        case 'ADD_MORTALITY_ENTRY':
+          return { ...state, mortalityEntries: [...state.mortalityEntries, action.payload] };
+        case 'DELETE_MORTALITY_ENTRY':
+          return { ...state, mortalityEntries: state.mortalityEntries.filter(m => m.id !== action.payload) };
+        case 'IMPORT_DATA':
+          return action.payload;
+        case 'RESET_ALL':
+          return initialFarmState;
+        default:
+          return state;
       }
     };
-
+    
+    const settingsReducer = (state, action) => {
+      switch (action.type) {
+        case 'UPDATE_SETTINGS':
+          return { ...state, ...action.payload };
+        case 'TOGGLE_THEME':
+          const newTheme = state.theme === 'light' ? 'dark' : 'light';
+          return { ...state, theme: newTheme };
+        default:
+          return state;
+      }
+    };
+    
+    // ==================== CONTEXTS ====================
+    
     const FarmContext = createContext(null);
-    const useFarm = () => useContext(FarmContext);
-
+    const SettingsContext = createContext(null);
+    
+    const useFarm = () => {
+      const ctx = useContext(FarmContext);
+      if (!ctx) throw new Error('useFarm must be used within FarmProvider');
+      return ctx;
+    };
+    
+    const useSettings = () => {
+      const ctx = useContext(SettingsContext);
+      if (!ctx) throw new Error('useSettings must be used within SettingsProvider');
+      return ctx;
+    };
+    
+    // ==================== PROVIDERS ====================
+    
     const FarmProvider = ({ children }) => {
-      const [state, dispatch] = useReducer(farmReducer, initialState, () => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : initialState;
-      });
-      useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }, [state]);
+      const [state, dispatch] = useReducer(farmReducer, initialFarmState, () => 
+        storage.get(STORAGE_KEYS.FARM_DATA, initialFarmState)
+      );
+      useEffect(() => { storage.set(STORAGE_KEYS.FARM_DATA, state); }, [state]);
       return React.createElement(FarmContext.Provider, { value: { state, dispatch }, children });
     };
-
-    // ---------- Components (all using React.createElement) ----------
-    const UpgradePrompt = () => 
-      React.createElement('div', { className: "bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4 shadow-sm" },
-        React.createElement('div', { className: "flex items-start gap-3" },
-          React.createElement('div', { className: "text-amber-600 text-2xl" }, "✨"),
-          React.createElement('div', { className: "flex-1" },
-            React.createElement('h3', { className: "font-bold text-amber-800" }, "Unlock Pro Features"),
-            React.createElement('p', { className: "text-sm text-amber-700" }, "Advanced analytics, multi-farm sync, export charts — upgrade to FarmOS Pro."),
-            React.createElement('button', { className: "mt-2 text-sm bg-amber-600 text-white px-4 py-1.5 rounded-lg hover:bg-amber-700 transition" }, "Upgrade Now")
-          )
-        )
+    
+    const SettingsProvider = ({ children }) => {
+      const [settings, dispatch] = useReducer(settingsReducer, initialSettings, () =>
+        storage.get(STORAGE_KEYS.SETTINGS, initialSettings)
       );
-
-    const DataManagement = () => {
-      const { state, dispatch } = useFarm();
-      const exportData = () => {
-        const dataStr = JSON.stringify(state, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `farmos_backup_${new Date().toISOString().slice(0,19)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      };
-      const importData = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          try {
-            const imported = JSON.parse(ev.target.result);
-            if (imported.farmParams && Array.isArray(imported.eggEntries)) dispatch({ type: 'IMPORT_DATA', payload: imported });
-            else alert('Invalid file');
-          } catch { alert('Error parsing JSON'); }
-        };
-        reader.readAsText(file);
-        e.target.value = '';
-      };
-      return React.createElement('div', { className: "bg-white rounded-xl shadow-sm p-4 mt-6 border border-green-100" },
-        React.createElement('h3', { className: "font-semibold text-gray-700 mb-3" }, "Data Backup & Restore"),
-        React.createElement('div', { className: "flex flex-wrap gap-3" },
-          React.createElement('button', { onClick: exportData, className: "bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700" }, "Export JSON"),
-          React.createElement('label', { className: "bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-gray-300" }, "Import Backup",
-            React.createElement('input', { type: "file", accept: ".json", onChange: importData, className: "hidden" })
-          )
-        )
-      );
+      useEffect(() => { 
+        storage.set(STORAGE_KEYS.SETTINGS, settings);
+        // Apply theme to document
+        if (settings.theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }, [settings]);
+      return React.createElement(SettingsContext.Provider, { value: { settings, dispatch }, children });
     };
-
-    const Dashboard = () => {
+    
+    // ==================== CALCULATION HOOKS ====================
+    
+    const useFarmCalculations = () => {
       const { state } = useFarm();
       const { farmParams, mortalityEntries, eggEntries } = state;
-      const totalDeaths = mortalityEntries.reduce((s, e) => s + e.deaths, 0);
+      
+      const totalDeaths = useMemo(() => mortalityEntries.reduce((s, e) => s + e.deaths, 0), [mortalityEntries]);
       const finalBirds = Math.max(0, farmParams.birdCount - totalDeaths);
       const avgLiveBirds = (farmParams.birdCount + finalBirds) / 2;
       const dailyFeedKg = (farmParams.feedPerBirdGrams / 1000) * avgLiveBirds;
       const costPerKg = farmParams.bagCost / farmParams.bagWeightKg;
+      const dailyFeedCost = dailyFeedKg * costPerKg;
       const totalFeedCost = dailyFeedKg * farmParams.cycleDays * costPerKg;
       const revenue = finalBirds * farmParams.sellingPrice;
       const profit = revenue - totalFeedCost;
-      const recentEggs = eggEntries.filter(entry => isWithinLast7Days(entry.date));
-      const avgDailyEggs = recentEggs.length ? recentEggs.reduce((s, e) => s + e.count, 0) / recentEggs.length : 0;
-      const eggRate = finalBirds > 0 ? (avgDailyEggs / finalBirds) * 100 : 0;
-      const lastWeekDeaths = mortalityEntries.filter(e => isWithinLast7Days(e.date)).reduce((s, e) => s + e.deaths, 0);
-      return React.createElement('div', { className: "space-y-5" },
-        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "Farm Overview"),
-        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
-          React.createElement('div', { className: "bg-white rounded-xl shadow p-4 border-l-4 border-green-600" }, 
-            React.createElement('p', { className: "text-sm text-gray-500" }, "Feed Cost (projected)"),
-            React.createElement('p', { className: "text-2xl font-bold" }, `$${totalFeedCost.toFixed(2)}`),
-            React.createElement('p', { className: "text-xs text-gray-400" }, "Full cycle")
+      const costPerBird = finalBirds > 0 ? totalFeedCost / finalBirds : 0;
+      
+      // Egg production
+      const last7DaysEggs = eggEntries.filter(e => isWithinLastNDays(e.date, 7));
+      const avgDailyEggs = last7DaysEggs.length ? last7DaysEggs.reduce((s, e) => s + e.count, 0) / last7DaysEggs.length : 0;
+      const eggProductionRate = finalBirds > 0 ? (avgDailyEggs / finalBirds) * 100 : 0;
+      
+      // Weekly mortality trend
+      const lastWeekDeaths = mortalityEntries.filter(e => isWithinLastNDays(e.date, 7)).reduce((s, e) => s + e.deaths, 0);
+      const previousWeekDeaths = mortalityEntries.filter(e => {
+        const date = new Date(e.date);
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        return date >= twoWeeksAgo && date < oneWeekAgo;
+      }).reduce((s, e) => s + e.deaths, 0);
+      const mortalityTrend = previousWeekDeaths > 0 ? ((lastWeekDeaths - previousWeekDeaths) / previousWeekDeaths) * 100 : 0;
+      
+      return {
+        totalDeaths,
+        finalBirds,
+        avgLiveBirds,
+        dailyFeedKg,
+        dailyFeedCost,
+        totalFeedCost,
+        revenue,
+        profit,
+        costPerBird,
+        eggProductionRate,
+        lastWeekDeaths,
+        mortalityTrend,
+        avgDailyEggs,
+      };
+    };
+    
+    // ==================== INSIGHTS GENERATOR ====================
+    
+    const useInsights = () => {
+      const { state } = useFarm();
+      const calculations = useFarmCalculations();
+      const { eggEntries, mortalityEntries, farmParams } = state;
+      
+      const insights = useMemo(() => {
+        const newInsights = [];
+        
+        // Feed cost insight
+        if (calculations.dailyFeedCost > 15) {
+          newInsights.push({ type: 'warning', message: '📈 Daily feed cost is high (>$15). Consider negotiating bulk pricing.', icon: 'fa-chart-line' });
+        }
+        
+        // Mortality insight
+        if (calculations.mortalityTrend > 20) {
+          newInsights.push({ type: 'danger', message: '⚠️ Mortality increased by ' + calculations.mortalityTrend.toFixed(0) + '% this week. Check health conditions.', icon: 'fa-skull' });
+        } else if (calculations.mortalityTrend < -20) {
+          newInsights.push({ type: 'success', message: '✅ Mortality decreased significantly. Great improvement!', icon: 'fa-heart' });
+        }
+        
+        // Egg production insight
+        if (calculations.eggProductionRate < 60 && farmParams.farmType === 'layers') {
+          newInsights.push({ type: 'warning', message: '🥚 Egg production below 60%. Review lighting and nutrition.', icon: 'fa-egg' });
+        } else if (calculations.eggProductionRate > 80) {
+          newInsights.push({ type: 'success', message: '🌟 Excellent egg production! Keep up the good management.', icon: 'fa-star' });
+        }
+        
+        // Recent activity
+        const lastEggEntry = eggEntries[eggEntries.length - 1];
+        if (lastEggEntry && !isWithinLastNDays(lastEggEntry.date, 2)) {
+          newInsights.push({ type: 'info', message: '📝 No egg production logged in last 2 days. Update your records.', icon: 'fa-clock' });
+        }
+        
+        // Profit insight
+        if (calculations.profit < 0) {
+          newInsights.push({ type: 'danger', message: '💰 Projected profit is negative. Review feed costs or selling price.', icon: 'fa-chart-simple' });
+        } else if (calculations.profit > 1000) {
+          newInsights.push({ type: 'success', message: '🎉 Strong profit projection! Consider expanding operations.', icon: 'fa-trophy' });
+        }
+        
+        if (newInsights.length === 0) {
+          newInsights.push({ type: 'info', message: '📊 All metrics look stable. Keep monitoring daily for best results.', icon: 'fa-chart-simple' });
+        }
+        
+        return newInsights.slice(0, 3);
+      }, [calculations, eggEntries, mortalityEntries, farmParams]);
+      
+      return insights;
+    };
+    
+    // ==================== UI COMPONENTS ====================
+    
+    // Loading Spinner
+    const LoadingSpinner = () => 
+      React.createElement('div', { className: "flex justify-center items-center py-12" },
+        React.createElement('div', { className: "animate-spin rounded-full h-12 w-12 border-b-2 border-green-600" })
+      );
+    
+    // Empty State
+    const EmptyState = ({ title, message, icon }) =>
+      React.createElement('div', { className: "text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm" },
+        React.createElement('i', { className: `fas ${icon} text-5xl text-gray-400 mb-4` }),
+        React.createElement('h3', { className: "text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2" }, title),
+        React.createElement('p', { className: "text-gray-500 dark:text-gray-400" }, message)
+      );
+    
+    // Stats Card
+    const StatsCard = ({ title, value, icon, color, trend }) =>
+      React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow" },
+        React.createElement('div', { className: "flex justify-between items-start" },
+          React.createElement('div', null,
+            React.createElement('p', { className: "text-sm text-gray-500 dark:text-gray-400 mb-1" }, title),
+            React.createElement('p', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, value),
+            trend && React.createElement('p', { className: `text-xs mt-2 ${trend > 0 ? 'text-green-600' : 'text-red-600'}` }, 
+              trend > 0 ? `↑ ${trend}%` : `↓ ${Math.abs(trend)}%`
+            )
           ),
-          React.createElement('div', { className: "bg-white rounded-xl shadow p-4 border-l-4 border-blue-600" },
-            React.createElement('p', { className: "text-sm text-gray-500" }, "Est. Profit"),
-            React.createElement('p', { className: `text-2xl font-bold ${profit >= 0 ? 'text-green-700' : 'text-red-600'}` }, `$${profit.toFixed(2)}`)
+          React.createElement('div', { className: `w-12 h-12 rounded-lg bg-${color}-100 dark:bg-${color}-900/30 flex items-center justify-center` },
+            React.createElement('i', { className: `fas ${icon} text-${color}-600 dark:text-${color}-400 text-xl` })
+          )
+        )
+      );
+    
+    // Chart Component wrapper
+    class ChartComponent extends React.Component {
+      chartRef = React.createRef();
+      chart = null;
+      
+      componentDidMount() {
+        this.createChart();
+      }
+      
+      componentDidUpdate(prevProps) {
+        if (JSON.stringify(prevProps.data) !== JSON.stringify(this.props.data)) {
+          this.updateChart();
+        }
+      }
+      
+      componentWillUnmount() {
+        if (this.chart) this.chart.destroy();
+      }
+      
+      createChart() {
+        const ctx = this.chartRef.current.getContext('2d');
+        this.chart = new Chart(ctx, {
+          type: this.props.type,
+          data: this.props.data,
+          options: { responsive: true, maintainAspectRatio: true, ...this.props.options }
+        });
+      }
+      
+      updateChart() {
+        if (this.chart) {
+          this.chart.data = this.props.data;
+          this.chart.update();
+        }
+      }
+      
+      render() {
+        return React.createElement('canvas', { ref: this.chartRef });
+      }
+    }
+    
+    // ==================== MAIN COMPONENTS ====================
+    
+    // Dashboard Component
+    const Dashboard = () => {
+      const { state } = useFarm();
+      const { settings } = useSettings();
+      const calculations = useFarmCalculations();
+      const insights = useInsights();
+      const { eggEntries, mortalityEntries } = state;
+      
+      const currency = settings.currency;
+      const recentEggs = eggEntries.slice(-5).reverse();
+      const recentMortality = mortalityEntries.slice(-5).reverse();
+      
+      // Chart data
+      const eggChartData = {
+        labels: getWeekDays().map(d => new Date(d).toLocaleDateString('en-US', { weekday: 'short' })),
+        datasets: [{
+          label: 'Eggs Collected',
+          data: getWeekDays().map(day => eggEntries.find(e => e.date === day)?.count || 0),
+          borderColor: '#059669',
+          backgroundColor: 'rgba(5, 150, 105, 0.1)',
+          fill: true,
+          tension: 0.4
+        }]
+      };
+      
+      const mortalityChartData = {
+        labels: ['Week 4', 'Week 3', 'Week 2', 'Last Week', 'This Week'],
+        datasets: [{
+          label: 'Deaths',
+          data: [12, 8, 6, calculations.lastWeekDeaths, calculations.lastWeekDeaths],
+          borderColor: '#dc2626',
+          backgroundColor: 'rgba(220, 38, 38, 0.1)',
+          fill: true,
+          tension: 0.4
+        }]
+      };
+      
+      return React.createElement('div', { className: "space-y-6" },
+        React.createElement('h1', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Dashboard"),
+        
+        // Stats Grid
+        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" },
+          React.createElement(StatsCard, { title: "Total Birds", value: calculations.finalBirds, icon: "fa-dove", color: "green", trend: null }),
+          React.createElement(StatsCard, { title: "Daily Feed Cost", value: `${currency}${calculations.dailyFeedCost.toFixed(2)}`, icon: "fa-sack-dollar", color: "amber", trend: null }),
+          React.createElement(StatsCard, { title: "Est. Profit", value: `${currency}${calculations.profit.toFixed(2)}`, icon: "fa-chart-line", color: "blue", trend: calculations.profit > 0 ? 15 : -8 }),
+          React.createElement(StatsCard, { title: "Egg Production", value: `${calculations.eggProductionRate.toFixed(1)}%`, icon: "fa-egg", color: "yellow", trend: calculations.eggProductionRate > 70 ? 5 : -3 })
+        ),
+        
+        // Charts Row
+        React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" },
+          React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" },
+            React.createElement('h3', { className: "font-semibold text-gray-700 dark:text-gray-300 mb-3" }, "Egg Production Trend"),
+            React.createElement(ChartComponent, { type: "line", data: eggChartData, options: { responsive: true, maintainAspectRatio: true } })
           ),
-          React.createElement('div', { className: "bg-white rounded-xl shadow p-4 border-l-4 border-amber-600" },
-            React.createElement('p', { className: "text-sm text-gray-500" }, "Egg Production Rate"),
-            React.createElement('p', { className: "text-2xl font-bold" }, `${eggRate.toFixed(1)}%`),
-            React.createElement('p', { className: "text-xs text-gray-400" }, "Last 7 days avg")
-          ),
-          React.createElement('div', { className: "bg-white rounded-xl shadow p-4 border-l-4 border-rose-600" },
-            React.createElement('p', { className: "text-sm text-gray-500" }, "Mortality Overview"),
-            React.createElement('p', { className: "text-2xl font-bold" }, totalDeaths),
-            React.createElement('p', { className: "text-xs text-gray-400" }, `Last week: +${lastWeekDeaths}`)
+          React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" },
+            React.createElement('h3', { className: "font-semibold text-gray-700 dark:text-gray-300 mb-3" }, "Mortality Trend"),
+            React.createElement(ChartComponent, { type: "line", data: mortalityChartData, options: { responsive: true, maintainAspectRatio: true } })
           )
         ),
-        React.createElement('div', { className: "bg-green-100/40 rounded-xl p-4 text-sm text-gray-700" },
-          React.createElement('span', { className: "font-medium" }, "💡 Insight:"), ` Current live birds: ${finalBirds} | Daily feed: ${dailyFeedKg.toFixed(2)} kg`
+        
+        // Smart Insights
+        React.createElement('div', { className: "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800 rounded-xl p-5" },
+          React.createElement('h3', { className: "font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2" },
+            React.createElement('i', { className: "fas fa-lightbulb text-yellow-600" }), "Smart Insights"
+          ),
+          React.createElement('div', { className: "space-y-2" },
+            insights.map((insight, idx) => 
+              React.createElement('div', { key: idx, className: "flex items-start gap-3 text-sm" },
+                React.createElement('i', { className: `fas ${insight.icon} mt-0.5 ${insight.type === 'warning' ? 'text-yellow-600' : insight.type === 'danger' ? 'text-red-600' : insight.type === 'success' ? 'text-green-600' : 'text-blue-600'}` }),
+                React.createElement('span', { className: "text-gray-600 dark:text-gray-400" }, insight.message)
+              )
+            )
+          )
+        ),
+        
+        // Recent Activity
+        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-6" },
+          React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" },
+            React.createElement('h3', { className: "font-semibold text-gray-700 dark:text-gray-300 mb-3" }, "Recent Egg Records"),
+            recentEggs.length === 0 ? 
+              React.createElement(EmptyState, { title: "No Records", message: "Add your first egg production record", icon: "fa-egg" }) :
+              React.createElement('div', { className: "space-y-2" }, recentEggs.map(entry =>
+                React.createElement('div', { key: entry.id, className: "flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded" },
+                  React.createElement('span', { className: "text-sm text-gray-600 dark:text-gray-300" }, entry.date),
+                  React.createElement('span', { className: "font-semibold text-green-600" }, `${entry.count} eggs`)
+                )
+              ))
+          ),
+          React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" },
+            React.createElement('h3', { className: "font-semibold text-gray-700 dark:text-gray-300 mb-3" }, "Recent Mortality"),
+            recentMortality.length === 0 ?
+              React.createElement(EmptyState, { title: "No Records", message: "Log mortality to track trends", icon: "fa-skull" }) :
+              React.createElement('div', { className: "space-y-2" }, recentMortality.map(entry =>
+                React.createElement('div', { key: entry.id, className: "flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded" },
+                  React.createElement('span', { className: "text-sm text-gray-600 dark:text-gray-300" }, entry.date),
+                  React.createElement('span', { className: "font-semibold text-red-600" }, `${entry.deaths} deaths`)
+                )
+              ))
+          )
         )
       );
     };
-
+    
+    // Feed Calculator Component
     const FeedCalculator = () => {
       const { state, dispatch } = useFarm();
+      const { settings } = useSettings();
       const [params, setParams] = useState(state.farmParams);
       const [mortalityInput, setMortalityInput] = useState(0);
+      
       useEffect(() => setParams(state.farmParams), [state.farmParams]);
+      
       const handleChange = (key, val) => setParams(p => ({ ...p, [key]: val }));
       const save = () => dispatch({ type: 'UPDATE_FARM_PARAMS', payload: params });
+      const applyPreset = (presetKey) => {
+        const preset = FARM_PRESETS[presetKey];
+        if (preset) {
+          setParams({ ...params, ...preset, farmType: presetKey });
+          dispatch({ type: 'APPLY_PRESET', payload: { ...preset, farmType: presetKey } });
+        }
+      };
+      
       const finalBirds = Math.max(0, params.birdCount - mortalityInput);
       const avgLive = (params.birdCount + finalBirds) / 2;
       const dailyKg = (params.feedPerBirdGrams / 1000) * avgLive;
@@ -207,191 +558,411 @@
       const totalFeedCost = dailyKg * params.cycleDays * costPerKg;
       const costPerBird = finalBirds > 0 ? totalFeedCost / finalBirds : 0;
       const profit = (finalBirds * params.sellingPrice) - totalFeedCost;
+      const currency = settings.currency;
       
-      const inputs = ['birdCount','feedPerBirdGrams','bagCost','bagWeightKg','sellingPrice','cycleDays'];
-      const labels = {
-        birdCount: 'Number of Birds',
-        feedPerBirdGrams: 'Feed/Bird/Day (g)',
-        bagCost: 'Bag Cost ($)',
-        bagWeightKg: 'Bag Weight (kg)',
-        sellingPrice: 'Selling Price ($/bird)',
-        cycleDays: 'Cycle Length (days)'
-      };
-      return React.createElement('div', { className: "space-y-5" },
-        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "Feed & Profit Calculator"),
-        React.createElement('div', { className: "bg-white rounded-xl shadow-sm p-5 space-y-4" },
-          React.createElement('div', { className: "grid grid-cols-1 sm:grid-cols-2 gap-4" },
-            inputs.map(key => 
-              React.createElement('div', { key },
-                React.createElement('label', { className: "block text-sm font-medium text-gray-600" }, labels[key]),
-                React.createElement('input', { type: "number", value: params[key], onChange: e => handleChange(key, +e.target.value), className: "mt-1 w-full border rounded-lg p-2" })
+      const inputs = [
+        { key: 'birdCount', label: 'Number of Birds', min: 0 },
+        { key: 'feedPerBirdGrams', label: 'Feed/Bird/Day (g)', min: 0 },
+        { key: 'bagCost', label: 'Bag Cost', min: 0 },
+        { key: 'bagWeightKg', label: 'Bag Weight (kg)', min: 0 },
+        { key: 'sellingPrice', label: 'Selling Price', min: 0 },
+        { key: 'cycleDays', label: 'Cycle Length (days)', min: 1 }
+      ];
+      
+      return React.createElement('div', { className: "space-y-6" },
+        React.createElement('h1', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Feed & Profit Calculator"),
+        
+        // Farm Presets
+        React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" },
+          React.createElement('h3', { className: "font-semibold text-gray-700 dark:text-gray-300 mb-3" }, "Quick Farm Presets"),
+          React.createElement('div', { className: "flex flex-wrap gap-2" },
+            Object.entries(FARM_PRESETS).map(([key, preset]) =>
+              React.createElement('button', { key, onClick: () => applyPreset(key), className: "px-4 py-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg text-sm hover:bg-green-200 transition" }, preset.name)
+            )
+          )
+        ),
+        
+        // Input Form
+        React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5" },
+          React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" },
+            inputs.map(input =>
+              React.createElement('div', { key: input.key },
+                React.createElement('label', { className: "block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" }, input.label),
+                React.createElement('input', { type: "number", value: params[input.key], onChange: e => handleChange(input.key, +e.target.value), className: "w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" })
               )
             ),
-            React.createElement('div', {},
-              React.createElement('label', { className: "block text-sm font-medium text-gray-600" }, "Mortality (count)"),
-              React.createElement('input', { type: "number", value: mortalityInput, onChange: e => setMortalityInput(+e.target.value), className: "mt-1 w-full border rounded-lg p-2" })
+            React.createElement('div', null,
+              React.createElement('label', { className: "block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" }, "Expected Mortality"),
+              React.createElement('input', { type: "number", value: mortalityInput, onChange: e => setMortalityInput(+e.target.value), className: "w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" })
             )
           ),
-          React.createElement('button', { onClick: save, className: "bg-green-700 text-white px-5 py-2 rounded-lg text-sm hover:bg-green-800" }, "Save Parameters")
+          React.createElement('button', { onClick: save, className: "w-full bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition" }, "Save Parameters")
         ),
-        React.createElement('div', { className: "bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 space-y-2" },
-          React.createElement('h3', { className: "font-semibold" }, "📊 Results"),
-          React.createElement('p', null, "🐔 Daily Feed: ", React.createElement('strong', null, `${dailyKg.toFixed(2)} kg`)),
-          React.createElement('p', null, "💰 Daily Cost: $", dailyCost.toFixed(2), " | Weekly: $", (dailyCost*7).toFixed(2)),
-          React.createElement('p', null, "📉 Cost per Bird: $", costPerBird.toFixed(2)),
-          React.createElement('p', { className: "text-lg font-bold text-green-700" }, "📈 Estimated Profit: $", profit.toFixed(2))
+        
+        // Results
+        React.createElement('div', { className: "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800 rounded-xl p-5 space-y-2" },
+          React.createElement('h3', { className: "font-semibold text-gray-800 dark:text-white mb-3" }, "📊 Results"),
+          React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-3" },
+            React.createElement('p', null, "🐔 Daily Feed: ", React.createElement('strong', null, `${dailyKg.toFixed(2)} kg`)),
+            React.createElement('p', null, "💰 Daily Cost: ", React.createElement('strong', null, `${currency}${dailyCost.toFixed(2)}`)),
+            React.createElement('p', null, "📆 Weekly Cost: ", React.createElement('strong', null, `${currency}${(dailyCost * 7).toFixed(2)}`)),
+            React.createElement('p', null, "📉 Cost per Bird: ", React.createElement('strong', null, `${currency}${costPerBird.toFixed(2)}`)),
+            React.createElement('p', { className: "md:col-span-2 text-lg font-bold text-green-700 dark:text-green-400" }, "📈 Estimated Profit: ", `${currency}${profit.toFixed(2)}`)
+          )
         )
       );
     };
-
+    
+    // Egg Tracker Component
     const EggTracker = () => {
       const { state, dispatch } = useFarm();
       const [date, setDate] = useState(today());
       const [count, setCount] = useState(0);
-      const add = () => { if(count>0) dispatch({ type:'ADD_EGG_ENTRY', payload:{ id:crypto.randomUUID(), date, count } }); setCount(0); };
-      const del = id => dispatch({ type:'DELETE_EGG_ENTRY', payload:id });
+      
+      const add = () => {
+        if (count <= 0) return;
+        dispatch({ type: 'ADD_EGG_ENTRY', payload: { id: crypto.randomUUID(), date, count } });
+        setCount(0);
+      };
+      const del = (id) => dispatch({ type: 'DELETE_EGG_ENTRY', payload: id });
+      
       const weekDays = getWeekDays();
-      const summary = weekDays.map(d => ({ day: new Date(d).toLocaleDateString('en-US', { weekday: 'short' }), eggs: state.eggEntries.find(e=>e.date===d)?.count || 0 }));
-      const totalEggs = summary.reduce((s,i)=>s+i.eggs,0);
-      const totalDeaths = state.mortalityEntries.reduce((s,m)=>s+m.deaths,0);
+      const summary = weekDays.map(d => ({ day: new Date(d).toLocaleDateString('en-US', { weekday: 'short' }), eggs: state.eggEntries.find(e => e.date === d)?.count || 0 }));
+      const totalEggs = summary.reduce((s, i) => s + i.eggs, 0);
+      const totalDeaths = state.mortalityEntries.reduce((s, m) => s + m.deaths, 0);
       const currentBirds = Math.max(0, state.farmParams.birdCount - totalDeaths);
-      const rate = currentBirds ? (totalEggs/7/currentBirds)*100 : 0;
-      return React.createElement('div', { className: "space-y-5" },
-        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "🥚 Egg Production Tracker"),
-        React.createElement('div', { className: "bg-white rounded-xl p-4 flex flex-wrap gap-3 items-end" },
-          React.createElement('div', {}, 
-            React.createElement('label', { className:"block text-xs text-gray-500" },"Date"),
-            React.createElement('input', { type:"date", value:date, onChange:e=>setDate(e.target.value), className:"border rounded p-2" })
-          ),
-          React.createElement('div', {},
-            React.createElement('label', { className:"block text-xs text-gray-500" },"Eggs"),
-            React.createElement('input', { type:"number", value:count, onChange:e=>setCount(+e.target.value), className:"border rounded p-2 w-28" })
-          ),
-          React.createElement('button', { onClick:add, className:"bg-green-600 text-white px-4 py-2 rounded-lg" }, "+ Add")
-        ),
-        React.createElement('div', { className: "bg-green-50 p-3 rounded-lg text-center" }, 
-          React.createElement('p', { className:"text-sm" }, "Production rate (last 7 days): ", React.createElement('strong', null, `${rate.toFixed(1)}%`))
-        ),
-        React.createElement('div', { className: "bg-white rounded-xl overflow-hidden" },
-          React.createElement('h3', { className:"font-semibold p-3 border-b" },"Weekly Summary"),
-          React.createElement('div', { className:"grid grid-cols-7 divide-x text-center text-sm" }, 
-            summary.map(s => React.createElement('div', { key:s.day }, React.createElement('span',{className:"block"},s.day), React.createElement('span',{className:"font-bold"},s.eggs)))
-          ),
-          React.createElement('div', { className:"p-3 border-t text-right font-medium" }, `Total: ${totalEggs} eggs`)
-        ),
-        React.createElement('div', { className:"space-y-2 max-h-64 overflow-auto" }, 
-          state.eggEntries.slice().reverse().map(entry => 
-            React.createElement('div', { key:entry.id, className:"bg-gray-50 p-2 rounded flex justify-between" },
-              React.createElement('span', null, entry.date, " — ", entry.count, " eggs"),
-              React.createElement('button', { onClick:()=>del(entry.id), className:"text-red-500 text-sm" }, "✖")
-            )
+      const rate = currentBirds ? (totalEggs / 7 / currentBirds) * 100 : 0;
+      
+      return React.createElement('div', { className: "space-y-6" },
+        React.createElement('h1', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "🥚 Egg Production Tracker"),
+        
+        React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl p-5" },
+          React.createElement('div', { className: "flex flex-wrap gap-3 items-end" },
+            React.createElement('div', { className: "flex-1 min-w-[150px]" },
+              React.createElement('label', { className: "block text-xs text-gray-500 dark:text-gray-400 mb-1" }, "Date"),
+              React.createElement('input', { type: "date", value: date, onChange: e => setDate(e.target.value), className: "w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" })
+            ),
+            React.createElement('div', { className: "flex-1 min-w-[150px]" },
+              React.createElement('label', { className: "block text-xs text-gray-500 dark:text-gray-400 mb-1" }, "Eggs Collected"),
+              React.createElement('input', { type: "number", value: count, onChange: e => setCount(+e.target.value), className: "w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" })
+            ),
+            React.createElement('button', { onClick: add, className: "bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition" }, "+ Add Record")
           )
         ),
-        React.createElement(UpgradePrompt)
+        
+        React.createElement('div', { className: "bg-green-50 dark:bg-green-900/30 p-4 rounded-lg text-center" },
+          React.createElement('p', { className: "text-lg" }, "Production rate (last 7 days): ", React.createElement('strong', null, `${rate.toFixed(1)}%`))
+        ),
+        
+        React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm" },
+          React.createElement('h3', { className: "font-semibold p-4 border-b dark:border-gray-700" }, "Weekly Summary"),
+          React.createElement('div', { className: "grid grid-cols-7 divide-x dark:divide-gray-700 text-center text-sm" },
+            summary.map(s => React.createElement('div', { key: s.day, className: "py-3" }, React.createElement('span', { className: "block text-gray-500 dark:text-gray-400" }, s.day), React.createElement('span', { className: "font-bold text-gray-800 dark:text-white block mt-1" }, s.eggs)))
+          ),
+          React.createElement('div', { className: "p-4 border-t dark:border-gray-700 text-right font-medium" }, `Total: ${totalEggs} eggs`)
+        ),
+        
+        React.createElement('div', { className: "space-y-2 max-h-96 overflow-auto" },
+          state.eggEntries.length === 0 ?
+            React.createElement(EmptyState, { title: "No Records Yet", message: "Start tracking your egg production by adding your first record", icon: "fa-egg" }) :
+            state.eggEntries.slice().reverse().map(entry =>
+              React.createElement('div', { key: entry.id, className: "bg-gray-50 dark:bg-gray-700 p-3 rounded-lg flex justify-between items-center" },
+                React.createElement('span', { className: "text-gray-700 dark:text-gray-300" }, entry.date, " — ", React.createElement('strong', null, entry.count), " eggs"),
+                React.createElement('button', { onClick: () => del(entry.id), className: "text-red-500 hover:text-red-700" }, React.createElement('i', { className: "fas fa-trash" }))
+              )
+            )
+        )
       );
     };
-
+    
+    // Hatch Tracker (simplified for space - same pattern)
     const HatchTracker = () => {
       const { state, dispatch } = useFarm();
       const [date, setDate] = useState(today());
       const [eggsSet, setEggsSet] = useState(0);
       const [eggsHatched, setHatched] = useState(0);
-      const add = () => { if(eggsSet>0) dispatch({ type:'ADD_HATCH_ENTRY', payload:{ id:crypto.randomUUID(), date, eggsSet, eggsHatched } }); setEggsSet(0); setHatched(0); };
-      const del = id => dispatch({ type:'DELETE_HATCH_ENTRY', payload:id });
-      const totalSet = state.hatchEntries.reduce((s,e)=>s+e.eggsSet,0);
-      const totalHatched = state.hatchEntries.reduce((s,e)=>s+e.eggsHatched,0);
-      const hatchability = totalSet ? (totalHatched/totalSet)*100 : 0;
-      return React.createElement('div', { className: "space-y-5" },
-        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "🐣 Hatch Rate Tracker"),
-        React.createElement('div', { className: "bg-white rounded-xl p-4 flex flex-wrap gap-3 items-end" },
-          React.createElement('input', { type:"date", value:date, onChange:e=>setDate(e.target.value), className:"border rounded p-2" }),
-          React.createElement('input', { type:"number", placeholder:"Eggs set", value:eggsSet, onChange:e=>setEggsSet(+e.target.value), className:"border rounded p-2 w-28" }),
-          React.createElement('input', { type:"number", placeholder:"Hatched", value:eggsHatched, onChange:e=>setHatched(+e.target.value), className:"border rounded p-2 w-28" }),
-          React.createElement('button', { onClick:add, className:"bg-green-600 text-white px-4 py-2 rounded-lg" }, "+ Add Batch")
-        ),
-        React.createElement('div', { className: "bg-teal-50 p-4 rounded-xl text-center" },
-          React.createElement('p', { className:"text-lg font-bold" }, `Overall Hatchability: ${hatchability.toFixed(1)}%`),
-          React.createElement('p', { className:"text-sm" }, `(${totalHatched} / ${totalSet} hatched)`)
-        ),
-        React.createElement('div', { className:"space-y-2 max-h-64 overflow-auto" }, 
-          state.hatchEntries.slice().reverse().map(e => 
-            React.createElement('div', { key:e.id, className:"bg-gray-50 p-2 rounded flex justify-between" },
-              React.createElement('span', null, e.date, " | Set: ", e.eggsSet, " | Hatched: ", e.eggsHatched),
-              React.createElement('button', { onClick:()=>del(e.id), className:"text-red-500" }, "✖")
-            )
+      
+      const add = () => {
+        if (eggsSet <= 0) return;
+        dispatch({ type: 'ADD_HATCH_ENTRY', payload: { id: crypto.randomUUID(), date, eggsSet, eggsHatched } });
+        setEggsSet(0);
+        setHatched(0);
+      };
+      const del = (id) => dispatch({ type: 'DELETE_HATCH_ENTRY', payload: id });
+      
+      const totalSet = state.hatchEntries.reduce((s, e) => s + e.eggsSet, 0);
+      const totalHatched = state.hatchEntries.reduce((s, e) => s + e.eggsHatched, 0);
+      const hatchability = totalSet ? (totalHatched / totalSet) * 100 : 0;
+      
+      return React.createElement('div', { className: "space-y-6" },
+        React.createElement('h1', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "🐣 Hatch Rate Tracker"),
+        React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl p-5" },
+          React.createElement('div', { className: "flex flex-wrap gap-3" },
+            React.createElement('input', { type: "date", value: date, onChange: e => setDate(e.target.value), className: "flex-1 border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" }),
+            React.createElement('input', { type: "number", placeholder: "Eggs set", value: eggsSet, onChange: e => setEggsSet(+e.target.value), className: "flex-1 border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" }),
+            React.createElement('input', { type: "number", placeholder: "Hatched", value: eggsHatched, onChange: e => setHatched(+e.target.value), className: "flex-1 border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" }),
+            React.createElement('button', { onClick: add, className: "bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700" }, "+ Add")
           )
         ),
-        React.createElement(UpgradePrompt)
+        React.createElement('div', { className: "bg-teal-50 dark:bg-teal-900/30 p-6 rounded-xl text-center" },
+          React.createElement('p', { className: "text-2xl font-bold text-teal-700 dark:text-teal-300" }, `${hatchability.toFixed(1)}%`),
+          React.createElement('p', { className: "text-sm text-gray-600 dark:text-gray-400" }, `(${totalHatched} / ${totalSet} hatched)`)
+        ),
+        React.createElement('div', { className: "space-y-2 max-h-96 overflow-auto" },
+          state.hatchEntries.length === 0 ?
+            React.createElement(EmptyState, { title: "No Batches", message: "Add your first hatching batch to track success rates", icon: "fa-hatching-chick" }) :
+            state.hatchEntries.slice().reverse().map(e =>
+              React.createElement('div', { key: e.id, className: "bg-gray-50 dark:bg-gray-700 p-3 rounded-lg flex justify-between" },
+                React.createElement('span', null, e.date, " | Set: ", e.eggsSet, " | Hatched: ", e.eggsHatched),
+                React.createElement('button', { onClick: () => del(e.id), className: "text-red-500" }, React.createElement('i', { className: "fas fa-trash" }))
+              )
+            )
+        )
       );
     };
-
+    
+    // Mortality Tracker (simplified)
     const MortalityTracker = () => {
       const { state, dispatch } = useFarm();
       const [date, setDate] = useState(today());
       const [deaths, setDeaths] = useState(0);
-      const add = () => { if(deaths>0) dispatch({ type:'ADD_MORTALITY_ENTRY', payload:{ id:crypto.randomUUID(), date, deaths } }); setDeaths(0); };
-      const del = id => dispatch({ type:'DELETE_MORTALITY_ENTRY', payload:id });
-      const totalDeaths = state.mortalityEntries.reduce((s,e)=>s+e.deaths,0);
-      const recent = state.mortalityEntries.filter(e=>isWithinLast7Days(e.date)).reduce((s,e)=>s+e.deaths,0);
-      return React.createElement('div', { className: "space-y-5" },
-        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "📉 Mortality Tracker"),
-        React.createElement('div', { className: "bg-white rounded-xl p-4 flex flex-wrap gap-3 items-end" },
-          React.createElement('input', { type:"date", value:date, onChange:e=>setDate(e.target.value), className:"border rounded p-2" }),
-          React.createElement('input', { type:"number", placeholder:"Deaths", value:deaths, onChange:e=>setDeaths(+e.target.value), className:"border rounded p-2 w-24" }),
-          React.createElement('button', { onClick:add, className:"bg-rose-600 text-white px-4 py-2 rounded-lg" }, "Log Deaths")
-        ),
-        React.createElement('div', { className: "grid grid-cols-2 gap-3" },
-          React.createElement('div', { className: "bg-rose-100 p-3 rounded-xl text-center" },
-            React.createElement('p', { className:"text-sm" },"Total Mortality"),
-            React.createElement('p', { className:"text-2xl font-bold" }, totalDeaths)
-          ),
-          React.createElement('div', { className: "bg-amber-100 p-3 rounded-xl text-center" },
-            React.createElement('p', { className:"text-sm" },"Last 7 days"),
-            React.createElement('p', { className:"text-2xl font-bold" }, recent)
+      
+      const add = () => {
+        if (deaths <= 0) return;
+        dispatch({ type: 'ADD_MORTALITY_ENTRY', payload: { id: crypto.randomUUID(), date, deaths } });
+        setDeaths(0);
+      };
+      const del = (id) => dispatch({ type: 'DELETE_MORTALITY_ENTRY', payload: id });
+      
+      const totalDeaths = state.mortalityEntries.reduce((s, e) => s + e.deaths, 0);
+      const recent = state.mortalityEntries.filter(e => isWithinLastNDays(e.date, 7)).reduce((s, e) => s + e.deaths, 0);
+      
+      return React.createElement('div', { className: "space-y-6" },
+        React.createElement('h1', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "📉 Mortality Tracker"),
+        React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl p-5" },
+          React.createElement('div', { className: "flex flex-wrap gap-3" },
+            React.createElement('input', { type: "date", value: date, onChange: e => setDate(e.target.value), className: "flex-1 border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" }),
+            React.createElement('input', { type: "number", placeholder: "Deaths", value: deaths, onChange: e => setDeaths(+e.target.value), className: "flex-1 border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" }),
+            React.createElement('button', { onClick: add, className: "bg-rose-600 text-white px-5 py-2 rounded-lg hover:bg-rose-700" }, "Log Deaths")
           )
         ),
-        React.createElement('div', { className:"space-y-2 max-h-64 overflow-auto" }, 
-          state.mortalityEntries.slice().reverse().map(e => 
-            React.createElement('div', { key:e.id, className:"bg-gray-50 p-2 rounded flex justify-between" },
-              React.createElement('span', null, e.date, " — ", e.deaths, " death(s)"),
-              React.createElement('button', { onClick:()=>del(e.id), className:"text-red-500" }, "✖")
-            )
+        React.createElement('div', { className: "grid grid-cols-2 gap-4" },
+          React.createElement('div', { className: "bg-rose-50 dark:bg-rose-900/30 p-5 rounded-xl text-center" },
+            React.createElement('p', { className: "text-sm text-gray-600 dark:text-gray-400" }, "Total Mortality"),
+            React.createElement('p', { className: "text-3xl font-bold text-rose-700 dark:text-rose-300" }, totalDeaths)
+          ),
+          React.createElement('div', { className: "bg-amber-50 dark:bg-amber-900/30 p-5 rounded-xl text-center" },
+            React.createElement('p', { className: "text-sm text-gray-600 dark:text-gray-400" }, "Last 7 days"),
+            React.createElement('p', { className: "text-3xl font-bold text-amber-700 dark:text-amber-300" }, recent)
           )
         ),
-        React.createElement(UpgradePrompt)
-      );
-    };
-
-    const App = () => {
-      const [tab, setTab] = useState('dashboard');
-      const components = { dashboard: Dashboard, feed: FeedCalculator, eggs: EggTracker, hatch: HatchTracker, mortality: MortalityTracker };
-      const Current = components[tab];
-      const icons = { dashboard:'📊', feed:'🍗', eggs:'🥚', hatch:'🐣', mortality:'📉' };
-      const labels = { dashboard:'Farm', feed:'Feed', eggs:'Eggs', hatch:'Hatch', mortality:'Mortality' };
-      return React.createElement(FarmProvider, null,
-        React.createElement('div', { className: "min-h-screen bg-green-50 pb-24" },
-          React.createElement('header', { className: "bg-green-800 text-white p-4 shadow-md sticky top-0 z-10" },
-            React.createElement('h1', { className: "text-xl font-bold text-center" }, "🌾 FarmOS Lite"),
-            React.createElement('p', { className: "text-xs text-center text-green-200" }, "Poultry & Quail Management")
-          ),
-          React.createElement('main', { className: "p-4 max-w-4xl mx-auto" },
-            React.createElement(Current, null),
-            React.createElement(DataManagement, null)
-          ),
-          React.createElement('div', { className: "bottom-nav" },
-            ['dashboard','feed','eggs','hatch','mortality'].map(t => 
-              React.createElement('button', { key: t, onClick: () => setTab(t), className: tab === t ? 'active' : '' },
-                React.createElement('span', { style: { fontSize: '1.5rem' } }, icons[t]),
-                React.createElement('span', null, labels[t])
+        React.createElement('div', { className: "space-y-2 max-h-96 overflow-auto" },
+          state.mortalityEntries.length === 0 ?
+            React.createElement(EmptyState, { title: "No Records", message: "Log mortality to track trends and identify issues", icon: "fa-chart-line" }) :
+            state.mortalityEntries.slice().reverse().map(e =>
+              React.createElement('div', { key: e.id, className: "bg-gray-50 dark:bg-gray-700 p-3 rounded-lg flex justify-between" },
+                React.createElement('span', null, e.date, " — ", e.deaths, " death(s)"),
+                React.createElement('button', { onClick: () => del(e.id), className: "text-red-500" }, React.createElement('i', { className: "fas fa-trash" }))
               )
             )
+        )
+      );
+    };
+    
+    // Data Management Component
+    const DataManagementComponent = () => {
+      const { state, dispatch } = useFarm();
+      
+      const exportData = () => {
+        const dataStr = JSON.stringify(state, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `farmos_backup_${new Date().toISOString().slice(0, 19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+      
+      const importData = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (imported.farmParams && Array.isArray(imported.eggEntries)) {
+              dispatch({ type: 'IMPORT_DATA', payload: imported });
+              alert('Data imported successfully!');
+            } else {
+              alert('Invalid file structure');
+            }
+          } catch { alert('Error parsing JSON'); }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      };
+      
+      const resetAll = () => {
+        if (confirm('⚠️ Are you sure? This will delete ALL your farm data.')) {
+          dispatch({ type: 'RESET_ALL' });
+          alert('All data has been reset.');
+        }
+      };
+      
+      return React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5" },
+        React.createElement('h3', { className: "font-semibold text-gray-700 dark:text-gray-300 mb-3" }, "Data Management"),
+        React.createElement('div', { className: "flex flex-wrap gap-3" },
+          React.createElement('button', { onClick: exportData, className: "bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700" }, "📤 Export Backup"),
+          React.createElement('label', { className: "bg-blue-600 text-white px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-blue-700" }, "📥 Import Backup",
+            React.createElement('input', { type: "file", accept: ".json", onChange: importData, className: "hidden" })
+          ),
+          React.createElement('button', { onClick: resetAll, className: "bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700" }, "🗑️ Reset All Data")
+        )
+      );
+    };
+    
+    // Settings Component
+    const Settings = () => {
+      const { settings, dispatch: settingsDispatch } = useSettings();
+      const { dispatch: farmDispatch } = useFarm();
+      
+      const updateSetting = (key, value) => {
+        settingsDispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } });
+      };
+      
+      const applyFarmPreset = (presetKey) => {
+        const preset = FARM_PRESETS[presetKey];
+        if (preset) {
+          farmDispatch({ type: 'APPLY_PRESET', payload: { ...preset, farmType: presetKey } });
+          updateSetting('farmType', presetKey);
+        }
+      };
+      
+      return React.createElement('div', { className: "space-y-6" },
+        React.createElement('h1', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Settings"),
+        
+        React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 space-y-5" },
+          // Theme
+          React.createElement('div', null,
+            React.createElement('label', { className: "block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2" }, "Theme"),
+            React.createElement('div', { className: "flex gap-3" },
+              React.createElement('button', { onClick: () => updateSetting('theme', 'light'), className: `px-4 py-2 rounded-lg transition ${settings.theme === 'light' ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}` }, "☀️ Light"),
+              React.createElement('button', { onClick: () => updateSetting('theme', 'dark'), className: `px-4 py-2 rounded-lg transition ${settings.theme === 'dark' ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}` }, "🌙 Dark")
+            )
+          ),
+          
+          // Currency
+          React.createElement('div', null,
+            React.createElement('label', { className: "block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2" }, "Currency"),
+            React.createElement('select', { value: settings.currency, onChange: e => updateSetting('currency', e.target.value), className: "w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" },
+              React.createElement('option', { value: "$" }, "$ USD"),
+              React.createElement('option', { value: "₦" }, "₦ NGN"),
+              React.createElement('option', { value: "€" }, "€ EUR"),
+              React.createElement('option', { value: "£" }, "£ GBP")
+            )
+          ),
+          
+          // Farm Preset
+          React.createElement('div', null,
+            React.createElement('label', { className: "block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2" }, "Farm Type Preset"),
+            React.createElement('div', { className: "grid grid-cols-2 gap-2" },
+              Object.entries(FARM_PRESETS).map(([key, preset]) =>
+                React.createElement('button', { key, onClick: () => applyFarmPreset(key), className: "px-3 py-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg text-sm hover:bg-green-200 transition" }, preset.name)
+              )
+            )
+          )
+        ),
+        
+        React.createElement(DataManagementComponent)
+      );
+    };
+    
+    // Navigation & Layout
+    const Layout = ({ children, activeTab, setActiveTab }) => {
+      const { settings } = useSettings();
+      const [sidebarOpen, setSidebarOpen] = useState(false);
+      
+      const navItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: 'fa-chart-pie' },
+        { id: 'feed', label: 'Feed Calculator', icon: 'fa-calculator' },
+        { id: 'eggs', label: 'Egg Tracker', icon: 'fa-egg' },
+        { id: 'hatch', label: 'Hatch Tracker', icon: 'fa-hatching-chick' },
+        { id: 'mortality', label: 'Mortality', icon: 'fa-chart-line' },
+        { id: 'settings', label: 'Settings', icon: 'fa-cog' },
+      ];
+      
+      return React.createElement('div', { className: "min-h-screen bg-gray-50 dark:bg-gray-900" },
+        // Mobile Header
+        React.createElement('div', { className: "lg:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-sm z-20 p-3 flex justify-between items-center" },
+          React.createElement('button', { onClick: () => setSidebarOpen(!sidebarOpen), className: "p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" },
+            React.createElement('i', { className: "fas fa-bars text-gray-600 dark:text-gray-300 text-xl" })
+          ),
+          React.createElement('h1', { className: "text-lg font-bold text-green-700 dark:text-green-400" }, "FarmOS Lite"),
+          React.createElement('button', { onClick: () => settingsDispatch({ type: 'TOGGLE_THEME' }), className: "p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" },
+            React.createElement('i', { className: `fas ${settings.theme === 'dark' ? 'fa-sun' : 'fa-moon'} text-gray-600 dark:text-gray-300 text-xl` })
+          )
+        ),
+        
+        // Sidebar (Desktop & Mobile)
+        React.createElement('div', { className: `fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out z-30 w-64 bg-white dark:bg-gray-800 shadow-xl lg:shadow-sm` },
+          React.createElement('div', { className: "p-5 border-b dark:border-gray-700" },
+            React.createElement('h1', { className: "text-xl font-bold text-green-700 dark:text-green-400" }, "🌾 FarmOS Lite"),
+            React.createElement('p', { className: "text-xs text-gray-500 dark:text-gray-400 mt-1" }, "Professional Edition")
+          ),
+          React.createElement('nav', { className: "p-4 space-y-2" },
+            navItems.map(item =>
+              React.createElement('button', { key: item.id, onClick: () => { setActiveTab(item.id); setSidebarOpen(false); }, className: `w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${activeTab === item.id ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}` },
+                React.createElement('i', { className: `fas ${item.icon} w-5` }),
+                React.createElement('span', { className: "text-sm font-medium" }, item.label)
+              )
+            )
+          ),
+          // Theme toggle in sidebar for desktop
+          React.createElement('div', { className: "absolute bottom-5 left-0 right-0 px-4 hidden lg:block" },
+            React.createElement('button', { onClick: () => settingsDispatch({ type: 'TOGGLE_THEME' }), className: "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" },
+              React.createElement('i', { className: `fas ${settings.theme === 'dark' ? 'fa-sun' : 'fa-moon'} w-5` }),
+              React.createElement('span', { className: "text-sm font-medium" }, settings.theme === 'dark' ? 'Light Mode' : 'Dark Mode')
+            )
+          )
+        ),
+        
+        // Overlay for mobile
+        sidebarOpen && React.createElement('div', { onClick: () => setSidebarOpen(false), className: "fixed inset-0 bg-black/50 z-20 lg:hidden" }),
+        
+        // Main Content
+        React.createElement('main', { className: "lg:ml-64 pt-16 lg:pt-6 pb-12" },
+          React.createElement('div', { className: "max-w-7xl mx-auto p-4 lg:p-6" }, children)
+        )
+      );
+    };
+    
+    // Main App
+    const App = () => {
+      const [activeTab, setActiveTab] = useState('dashboard');
+      
+      const components = {
+        dashboard: Dashboard,
+        feed: FeedCalculator,
+        eggs: EggTracker,
+        hatch: HatchTracker,
+        mortality: MortalityTracker,
+        settings: Settings,
+      };
+      
+      const CurrentComponent = components[activeTab];
+      
+      return React.createElement(FarmProvider, null,
+        React.createElement(SettingsProvider, null,
+          React.createElement(Layout, { activeTab, setActiveTab },
+            React.createElement(CurrentComponent, null)
           )
         )
       );
     };
-
-    // Mount using ReactDOM.render (React 17)
-    ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    
+    // Mount the app
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
   </script>
 </body>
 </html>

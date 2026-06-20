@@ -1,523 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>FarmKeeper Pro | Multi-User Farm Records</title>
-    <!-- Font Awesome Icons (Free CDN) for clean visuals -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FarmTrust · Verified Marketplace</title>
+    <!-- Tailwind via CDN + Inter font + Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        /* subtle agriculture texture overlay */
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(22, 78, 33, 0.85), rgba(34, 92, 56, 0.75)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1400&q=80') center/cover no-repeat;
         }
-
-        body {
-            background: #f4f7f2;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        /* Main containers */
-        .auth-container, .app-container {
-            background: white;
-            border-radius: 32px;
-            box-shadow: 0 20px 35px -12px rgba(0, 32, 0, 0.15);
-            width: 100%;
-            max-width: 1400px;
-            transition: all 0.2s ease;
-        }
-
-        .auth-card {
-            max-width: 460px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .app-container {
-            padding: 1.5rem;
-            display: none;
-        }
-
-        /* forms & buttons */
-        input, select, textarea, button {
-            border-radius: 20px;
-            border: 1px solid #dde0dc;
-            padding: 10px 16px;
-            font-size: 0.95rem;
-            background: #ffffff;
-            transition: 0.2s;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #2c6e2f;
-            box-shadow: 0 0 0 3px rgba(44,110,47,0.2);
-        }
-
-        button {
-            background: #2c6e2f;
-            color: white;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        button:hover {
-            background: #1f5422;
-            transform: scale(0.98);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #2c6e2f;
-            color: #2c6e2f;
-        }
-
-        .btn-outline:hover {
-            background: #eef5e9;
-        }
-
-        .btn-danger {
-            background: #c23b22;
-        }
-        .btn-danger:hover {
-            background: #9b2e1a;
-        }
-
-        /* Dashboard layout */
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-            border-bottom: 2px solid #e9f0e5;
-            padding-bottom: 16px;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 16px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: #fefdf8;
-            border-radius: 28px;
-            padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border: 1px solid #e2ebdb;
-            text-align: center;
-        }
-        .tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 24px;
-            border-bottom: 1px solid #e0e8da;
-            padding-bottom: 8px;
-        }
-        .tab-btn {
-            background: transparent;
-            color: #3a5a3a;
-            border-radius: 40px;
-            padding: 8px 18px;
-            font-weight: 500;
-        }
-        .tab-btn.active {
-            background: #2c6e2f;
-            color: white;
-        }
-        .tab-pane {
-            display: none;
-            animation: fade 0.2s ease;
-        }
-        .tab-pane.active-pane {
-            display: block;
-        }
-        @keyframes fade {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .record-card {
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 24px;
-            border: 1px solid #e2edda;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 16px;
-            align-items: end;
-        }
-        .form-row > * {
-            flex: 1 1 180px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-        }
-        th, td {
-            text-align: left;
-            padding: 12px 6px;
-            border-bottom: 1px solid #ecf3e7;
-        }
-        .action-icon {
-            color: #b33f2f;
-            cursor: pointer;
-            margin: 0 4px;
-        }
-        .chat-messages {
-            background: #fafcf8;
-            border-radius: 24px;
-            height: 280px;
-            overflow-y: auto;
-            padding: 16px;
-            border: 1px solid #dde4d4;
-        }
-        .chat-bubble {
-            margin-bottom: 12px;
-        }
-        .user-msg {
-            text-align: right;
-            color: #1f5422;
-        }
-        .bot-msg {
-            text-align: left;
-            background: #eef3e8;
-            border-radius: 20px;
-            padding: 8px 14px;
-            display: inline-block;
-            max-width: 85%;
-        }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
-        @media (max-width: 680px) {
-            body { padding: 12px; }
-            .app-container { padding: 1rem; }
-        }
-        .badge {
-            background: #e0ecda;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-        }
-        i.icon { margin-right: 6px; }
+        .card-hover { transition: all 0.2s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 30px -12px rgba(0,0,0,0.15); }
+        .badge-verified { background: #0b7e3d; color: white; padding: 2px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3px; }
+        .admin-toggle { cursor: pointer; opacity: 0.5; transition: 0.2s; }
+        .admin-toggle:hover { opacity: 1; }
+        .admin-panel { background: #f1f5f9; border-radius: 20px; border-left: 6px solid #1e5f3b; }
+        /* mobile friendly */
+        @media (max-width: 640px) { .hero-bg { background-position: 30% center; } }
     </style>
 </head>
-<body>
+<body class="bg-white text-gray-800 antialiased">
 
-<!-- AUTH VIEW -->
-<div id="authView" class="auth-container">
-    <div class="auth-card">
-        <div style="text-align: center; margin-bottom: 28px;">
-            <i class="fas fa-tractor" style="font-size: 48px; color: #2c6e2f;"></i>
-            <h2 style="margin-top: 12px;">FarmKeeper Pro</h2>
-            <p style="color: #4a6343;">Rabbit · Guinea Pig · Grasscutter · Incubation</p>
+    <!-- ===== HERO ===== -->
+    <section class="hero-bg text-white min-h-[90vh] flex items-center relative">
+        <div class="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-3">
+            <i class="fas fa-seedling text-3xl text-emerald-300"></i>
+            <span class="text-2xl font-bold tracking-tight">FarmTrust</span>
         </div>
-        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-            <button id="showLoginBtn" class="active-auth" style="flex:1; background:#2c6e2f;">Login</button>
-            <button id="showRegisterBtn" style="flex:1; background:#e2e8dd; color:#2c5a2a;">Register</button>
+        <div class="container mx-auto px-6 md:px-12 pt-24 pb-16">
+            <div class="max-w-3xl">
+                <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
+                    Verified <span class="text-emerald-200">Farmers</span>, <br/>Trusted Buyers
+                </h1>
+                <p class="text-lg md:text-xl text-emerald-50/90 max-w-xl mb-8">
+                    Connecting trusted farmers and buyers through verified seller registration.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#register" class="bg-white text-emerald-800 px-8 py-3 rounded-full font-semibold shadow-lg hover:bg-emerald-50 transition flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i> Register as Seller
+                    </a>
+                    <a href="#marketplace" class="bg-emerald-700/70 backdrop-blur-sm border border-white/30 px-8 py-3 rounded-full font-semibold hover:bg-emerald-600/80 transition flex items-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                </div>
+            </div>
         </div>
-        <!-- Login Form -->
-        <div id="loginForm">
-            <input type="text" id="loginUsername" placeholder="Username" autocomplete="off">
-            <input type="password" id="loginPassword" placeholder="Password" style="margin-top: 12px;">
-            <button id="doLoginBtn" style="width:100%; margin-top: 20px;">Sign In <i class="fas fa-arrow-right"></i></button>
-            <p id="loginError" style="color:#b33; margin-top:12px; font-size:0.85rem;"></p>
+        <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-8 text-emerald-100/60 text-sm">
+            <span><i class="fas fa-shield-alt mr-1"></i> KYC verified</span>
+            <span><i class="fas fa-store mr-1"></i> 200+ sellers</span>
+            <span><i class="fas fa-handshake mr-1"></i> Buyer protection</span>
         </div>
-        <!-- Register Form -->
-        <div id="registerForm" style="display:none;">
-            <input type="text" id="regUsername" placeholder="Username">
-            <input type="password" id="regPassword" placeholder="Password" style="margin-top:12px;">
-            <button id="doRegisterBtn" style="width:100%; margin-top:20px;">Create Account <i class="fas fa-seedling"></i></button>
-            <p id="regError" style="color:#b33; margin-top:12px;"></p>
+    </section>
+
+    <!-- ===== REGISTRATION + KYC (single section) ===== -->
+    <section id="register" class="py-16 md:py-24 bg-gray-50">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-emerald-900">Seller Verification</h2>
+                <p class="text-gray-600 mt-2">Complete your profile &amp; KYC to join the trusted marketplace</p>
+            </div>
+
+            <div class="grid md:grid-cols-5 gap-8">
+                <!-- form column -->
+                <div class="md:col-span-3 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                    <form id="sellerForm" class="space-y-6">
+                        <!-- Personal -->
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Full name *</label><input type="text" required class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="John Doe" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Phone *</label><input type="tel" required class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="+234 800 000 0000" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">WhatsApp *</label><input type="tel" required class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="+234 800 000 0000" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Email *</label><input type="email" required class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="farmer@example.com" /></div>
+                            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700">Profile picture</label><input type="file" accept="image/*" class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-emerald-50 file:text-emerald-700" /></div>
+                        </div>
+                        <!-- Farm -->
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Farm name *</label><input type="text" required class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3" placeholder="Green Valley Farms" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Farming category</label>
+                                <select class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 bg-white">
+                                    <option>Crops</option><option>Livestock</option><option>Poultry</option><option>Fishery</option><option>Mixed</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700">Products available</label><input type="text" class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3" placeholder="Maize, cassava, tomatoes, eggs" /></div>
+                            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700">Farm description</label><textarea rows="2" class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3" placeholder="Describe your farm, practices, etc."></textarea></div>
+                        </div>
+                        <!-- Location -->
+                        <div class="grid sm:grid-cols-3 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Country</label><input type="text" class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3" value="Nigeria" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">State</label><input type="text" class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3" placeholder="Oyo" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">City</label><input type="text" class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3" placeholder="Ibadan" /></div>
+                            <div class="sm:col-span-3"><label class="block text-sm font-medium text-gray-700">Farm address</label><input type="text" class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3" placeholder="Km 12, Oyo road, Ibadan" /></div>
+                        </div>
+                        <!-- GPS + Map -->
+                        <div class="flex flex-wrap items-center gap-4 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+                            <i class="fas fa-map-pin text-emerald-700 text-xl"></i>
+                            <button type="button" class="bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-emerald-800 transition">📍 Get GPS location</button>
+                            <span class="text-xs text-gray-500">or drag map marker</span>
+                            <div class="w-full h-36 bg-gray-200 rounded-xl mt-2 flex items-center justify-center text-gray-400 border border-gray-300">
+                                <i class="fas fa-map-marked-alt mr-2"></i> Map preview (Google Maps)
+                            </div>
+                        </div>
+
+                        <!-- KYC UPLOAD -->
+                        <div class="border-t border-gray-200 pt-6 mt-4">
+                            <h4 class="font-semibold text-emerald-800 flex items-center gap-2"><i class="fas fa-id-card"></i> KYC Upload</h4>
+                            <div class="grid sm:grid-cols-2 gap-4 mt-3">
+                                <div><label class="block text-sm font-medium text-gray-700">Government ID *</label><input type="file" required class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-2" /></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Selfie photo *</label><input type="file" required class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-2" /></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Farm pictures</label><input type="file" multiple class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-2" /></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Product pictures</label><input type="file" multiple class="w-full mt-1 border border-gray-300 rounded-xl px-4 py-2" /></div>
+                            </div>
+                            <p class="text-sm text-amber-700 bg-amber-50 p-3 rounded-xl mt-4 flex items-center gap-2"><i class="fas fa-clock"></i> Your verification will be reviewed before approval.</p>
+                        </div>
+
+                        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-4 rounded-xl text-lg shadow-md transition flex items-center justify-center gap-2">
+                            <i class="fas fa-check-circle"></i> Submit for Verification
+                        </button>
+                    </form>
+                </div>
+                <!-- side note: Trust & Security quick highlights -->
+                <div class="md:col-span-2 space-y-6">
+                    <div class="bg-emerald-50/70 p-6 rounded-2xl border border-emerald-100">
+                        <h3 class="font-bold text-emerald-900 flex items-center gap-2"><i class="fas fa-shield-alt text-emerald-600"></i> Trust & Security</h3>
+                        <ul class="mt-4 space-y-3 text-sm">
+                            <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-0.5"></i> <span><strong>Verified farmers</strong> – every seller is KYC checked</span></li>
+                            <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-0.5"></i> <span><strong>Secure KYC</strong> – encrypted document storage</span></li>
+                            <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-0.5"></i> <span><strong>Buyer protection</strong> – dispute resolution &amp; escrow</span></li>
+                            <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-0.5"></i> <span><strong>Scam reduction</strong> – active monitoring &amp; reporting</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                        <h4 class="font-semibold text-gray-700"><i class="fas fa-phone-alt text-emerald-600 mr-2"></i> WhatsApp group</h4>
+                        <p class="text-sm text-gray-500 mt-1">After verification, you'll be added to the official FarmTrust WhatsApp group.</p>
+                        <button class="mt-3 bg-[#25D366] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#128C7E] transition"><i class="fab fa-whatsapp mr-1"></i> Join preview</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p style="font-size:12px; text-align:center; margin-top:24px; color:#6d7c64;">🔒 Data stored locally in your browser · Multi-user ready</p>
-    </div>
-</div>
+    </section>
 
-<!-- MAIN APP VIEW (after login) -->
-<div id="appView" class="app-container">
-    <div class="dashboard-header">
-        <div><i class="fas fa-farm"></i> <strong id="currentUserSpan">Farmer</strong>'s Dashboard</div>
-        <div><button id="logoutBtn" class="btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
-    </div>
-    <!-- Stats Overview -->
-    <div class="stats-grid" id="statsOverview">
-        <!-- dynamic stats from JS -->
-    </div>
-    <!-- Tabs Navigation -->
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="rabbitTab"><i class="fas fa-rabbit"></i> Rabbit</button>
-        <button class="tab-btn" data-tab="guineaTab"><i class="fas fa-paw"></i> Guinea Pig</button>
-        <button class="tab-btn" data-tab="grasscutterTab"><i class="fas fa-leaf"></i> Grasscutter</button>
-        <button class="tab-btn" data-tab="incubationTab"><i class="fas fa-egg"></i> Bird Incubation</button>
-        <button class="tab-btn" data-tab="feedReportTab"><i class="fas fa-calculator"></i> Feed & Reports</button>
-        <button class="tab-btn" data-tab="chatbotTab"><i class="fas fa-robot"></i> AI Assistant</button>
-    </div>
-
-    <!-- RABBIT PANE -->
-    <div id="rabbitTab" class="tab-pane active-pane">
-        <div class="record-card"><div class="flex-between"><h3><i class="fas fa-heartbeat"></i> Rabbit Breeding Records</h3></div>
-            <div class="form-row"><input type="date" id="rbDate" placeholder="Date"><input type="text" id="rbDoe" placeholder="Doe ID"><input type="text" id="rbBuck" placeholder="Buck ID"><input type="number" id="rbLitter" placeholder="Litter size"><button id="addRabbitBreedingBtn">+ Add Breeding</button></div>
-            <table id="rabbitBreedingTable"><thead><tr><th>Date</th><th>Doe ID</th><th>Buck</th><th>Litter</th><th></th></tr></thead><tbody></tbody></table>
+    <!-- ===== MARKETPLACE PREVIEW ===== -->
+    <section id="marketplace" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-emerald-900">Marketplace <span class="text-emerald-600">preview</span></h2>
+                <span class="bg-emerald-100 text-emerald-800 px-4 py-1 rounded-full text-sm font-medium"><i class="fas fa-store"></i> 6 verified sellers</span>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- card 1 -->
+                <div class="card-hover bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=80" class="h-40 w-full object-cover" alt="farm" />
+                    <div class="p-5">
+                        <div class="flex items-center justify-between"><h3 class="font-bold text-lg">Green Valley</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
+                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Ibadan, Nigeria</p>
+                        <p class="text-sm text-gray-600 mt-2">Fresh organic tomatoes, peppers &amp; cassava</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-xs bg-emerald-50 px-3 py-1 rounded-full">Crops</span>
+                            <a href="#" class="bg-[#25D366] text-white px-4 py-1.5 rounded-full text-sm flex items-center gap-1 hover:bg-[#128C7E] transition"><i class="fab fa-whatsapp"></i> Contact</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- card 2 -->
+                <div class="card-hover bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1589924691995-4002509d3c7a?w=400&q=80" class="h-40 w-full object-cover" alt="farm" />
+                    <div class="p-5">
+                        <div class="flex items-center justify-between"><h3 class="font-bold text-lg">Palm Grove</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
+                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Akure, Nigeria</p>
+                        <p class="text-sm text-gray-600 mt-2">Palm oil, plantain, cocoa beans</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-xs bg-emerald-50 px-3 py-1 rounded-full">Mixed</span>
+                            <a href="#" class="bg-[#25D366] text-white px-4 py-1.5 rounded-full text-sm flex items-center gap-1 hover:bg-[#128C7E] transition"><i class="fab fa-whatsapp"></i> Contact</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- card 3 -->
+                <div class="card-hover bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=400&q=80" class="h-40 w-full object-cover" alt="farm" />
+                    <div class="p-5">
+                        <div class="flex items-center justify-between"><h3 class="font-bold text-lg">Dairy Plus</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
+                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Jos, Nigeria</p>
+                        <p class="text-sm text-gray-600 mt-2">Fresh milk, yogurt &amp; cheese</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-xs bg-emerald-50 px-3 py-1 rounded-full">Livestock</span>
+                            <a href="#" class="bg-[#25D366] text-white px-4 py-1.5 rounded-full text-sm flex items-center gap-1 hover:bg-[#128C7E] transition"><i class="fab fa-whatsapp"></i> Contact</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-gray-500 text-sm mt-8"><i class="fas fa-info-circle"></i> Only approved sellers can post adverts.</p>
         </div>
-        <div class="record-card"><h3><i class="fas fa-chart-line"></i> Rabbit Growth Tracking</h3>
-            <div class="form-row"><input type="text" id="rgRabbitId" placeholder="Rabbit ID"><input type="date" id="rgDate"><input type="number" step="0.1" id="rgWeight" placeholder="Weight (kg)"><input type="text" id="rgNotes" placeholder="Notes"><button id="addRabbitGrowthBtn">+ Record Growth</button></div>
-            <table id="rabbitGrowthTable"><thead><tr><th>Date</th><th>Rabbit ID</th><th>Weight (kg)</th><th>Notes</th><th></th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <!-- ===== ADMIN PANEL (hidden via toggle) ===== -->
+    <section class="py-12 bg-gray-100/70">
+        <div class="container mx-auto px-6 md:px-12 max-w-5xl">
+            <div class="admin-toggle text-center text-gray-400 text-xs uppercase tracking-wider" onclick="toggleAdmin()">
+                <i class="fas fa-user-cog"></i> admin access
+            </div>
+            <div id="adminPanel" class="mt-4 admin-panel p-6 hidden">
+                <h4 class="font-bold text-gray-700 flex items-center gap-2"><i class="fas fa-gavel text-emerald-700"></i> Admin Dashboard</h4>
+                <div class="grid md:grid-cols-3 gap-4 mt-4 text-sm">
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="font-semibold">Pending KYC</span> <span class="block text-2xl font-bold text-amber-600">4</span> <button class="mt-2 bg-emerald-600 text-white px-3 py-1 rounded-full text-xs">Review</button></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="font-semibold">Active sellers</span> <span class="block text-2xl font-bold text-emerald-700">12</span> <button class="mt-2 bg-emerald-600 text-white px-3 py-1 rounded-full text-xs">Manage</button></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="font-semibold">Adverts</span> <span class="block text-2xl font-bold text-blue-600">8</span> <button class="mt-2 bg-emerald-600 text-white px-3 py-1 rounded-full text-xs">Moderate</button></div>
+                </div>
+                <div class="flex flex-wrap gap-3 mt-4">
+                    <button class="bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-200 transition"><i class="fas fa-user-slash mr-1"></i> Remove account</button>
+                    <button class="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-200 transition"><i class="fas fa-check-double mr-1"></i> Approve selected</button>
+                    <button class="bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-300 transition"><i class="fas fa-undo-alt mr-1"></i> Reject</button>
+                </div>
+                <p class="text-xs text-gray-400 mt-3 border-t pt-3">Admin functions (hidden) – review, approve/reject KYC, manage adverts, remove accounts.</p>
+            </div>
         </div>
-    </div>
-    <!-- GUINEA PIG PANE -->
-    <div id="guineaTab" class="tab-pane">
-        <div class="record-card"><h3><i class="fas fa-paw"></i> Guinea Pig Breeding</h3><div class="form-row"><input type="date" id="gpDate"><input placeholder="Dam ID" id="gpDam"><input placeholder="Sire ID" id="gpSire"><input type="number" id="gpLitter" placeholder="Pups"><button id="addGuineaBreedingBtn">Add</button></div><table id="guineaBreedingTable"></table></div>
-        <div class="record-card"><h3>Guinea Pig Growth</h3><div class="form-row"><input id="gpAnimalId" placeholder="GP ID"><input type="date" id="gpGrowthDate"><input type="number" step="0.1" id="gpWeight" placeholder="Weight(kg)"><button id="addGuineaGrowthBtn">Record</button></div><table id="guineaGrowthTable"></table></div>
-    </div>
-    <!-- GRASSCUTTER PANE -->
-    <div id="grasscutterTab" class="tab-pane">
-        <div class="record-card"><h3>Grasscutter Breeding</h3><div class="form-row"><input type="date" id="gcDate"><input placeholder="Female ID" id="gcFemale"><input placeholder="Male ID" id="gcMale"><input type="number" id="gcOffspring" placeholder="Offspring"><button id="addGrasscutterBreedingBtn">Add</button></div><table id="grasscutterBreedingTable"></table></div>
-        <div class="record-card"><h3>Grasscutter Growth</h3><div class="form-row"><input id="gcAnimalId" placeholder="Animal ID"><input type="date" id="gcGrowthDate"><input step="0.1" type="number" id="gcWeight" placeholder="Weight(kg)"><button id="addGrasscutterGrowthBtn">Add Weight</button></div><table id="grasscutterGrowthTable"></table></div>
-    </div>
-    <!-- INCUBATION PANE -->
-    <div id="incubationTab" class="tab-pane">
-        <div class="record-card"><h3><i class="fas fa-temperature-high"></i> Egg Incubation Records</h3><div class="form-row"><select id="birdSpecies"><option>Chicken</option><option>Quail</option><option>Duck</option><option>Turkey</option><option>Guinea Fowl</option></select><input type="date" id="incSetDate"><input type="number" id="incEggCount" placeholder="Egg count"><input type="date" id="incExpHatch"><button id="addIncubationBtn">+ Incubation</button></div><table id="incubationTable"><thead><tr><th>Species</th><th>Set Date</th><th>Eggs</th><th>Expected Hatch</th><th></th></tr></thead><tbody></tbody></table></div>
-    </div>
-    <!-- FEED & REPORTS PANE -->
-    <div id="feedReportTab" class="tab-pane">
-        <div class="record-card"><h3><i class="fas fa-calculator"></i> Feed Calculation Tool</h3><div class="form-row"><select id="feedSpecies"><option>Rabbit</option><option>Guinea Pig</option><option>Grasscutter</option><option>Poultry/Birds</option></select><input type="number" id="animalCount" placeholder="Number of animals" value="10"><input type="number" step="0.1" id="avgWeightKg" placeholder="Avg weight (kg)"><button id="calculateFeedBtn">Calculate Daily Feed</button></div><div id="feedResult" class="badge" style="margin-top:12px; background:#eaf3e4;"></div></div>
-        <div class="record-card"><h3><i class="fas fa-chart-simple"></i> Automated Reports</h3><button id="generateReportBtn" class="btn-outline"><i class="fas fa-file-alt"></i> Generate Farming Report</button><div id="reportOutput" style="margin-top:18px; background:#fafaf5; border-radius:24px; padding:16px;"></div></div>
-    </div>
-    <!-- CHATBOT AI ASSISTANT -->
-    <div id="chatbotTab" class="tab-pane">
-        <div class="record-card"><h3><i class="fas fa-comment-dots"></i> Smart Farm Assistant (Symptom & Advice)</h3><div class="chat-messages" id="chatMessages"><div class="chat-bubble bot-msg">🐣 Hello! Ask me about animal symptoms, feeding, or disease solutions.</div></div><div class="form-row" style="margin-top:12px;"><input type="text" id="chatInput" placeholder="e.g., rabbit sneezing, diarrhea, egg binding..."><button id="sendChatBtn">Send <i class="fas fa-paper-plane"></i></button></div></div>
-    </div>
-</div>
+    </section>
 
-<script>
-    // ---------- LOCAL STORAGE USER MANAGEMENT ----------
-    let currentUser = null;
-    let userDataCache = null;   // holds current user's farm data
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-emerald-900 text-emerald-50 py-8">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2"><i class="fas fa-seedling text-emerald-300"></i> <span class="font-bold">FarmTrust</span></div>
+            <div class="text-sm opacity-80">© 2026 · Verified marketplace</div>
+            <div class="flex gap-4 text-emerald-300"><i class="fab fa-github"></i><i class="fab fa-twitter"></i><i class="fab fa-whatsapp"></i></div>
+        </div>
+    </footer>
 
-    function getUsers() { return JSON.parse(localStorage.getItem('farmUsers') || '{}'); }
-    function saveUsers(users) { localStorage.setItem('farmUsers', JSON.stringify(users)); }
+    <script>
+        // toggle admin panel (hidden)
+        function toggleAdmin() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('hidden');
+        }
 
-    // Default data structure for new user
-    function emptyUserData() {
-        return {
-            rabbitBreedings: [], rabbitGrowths: [],
-            guineaPigBreedings: [], guineaPigGrowths: [],
-            grasscutterBreedings: [], grasscutterGrowths: [],
-            birdIncubations: []
-        };
-    }
-
-    function loadUserData(username) {
-        const raw = localStorage.getItem(`farmData_${username}`);
-        if(raw) return JSON.parse(raw);
-        else return emptyUserData();
-    }
-
-    function saveUserData(username, data) {
-        localStorage.setItem(`farmData_${username}`, JSON.stringify(data));
-    }
-
-    // update current user data & persist
-    function updateUserData(newData) {
-        if(!currentUser) return;
-        userDataCache = newData;
-        saveUserData(currentUser, userDataCache);
-        refreshAllUI();
-    }
-
-    // Register
-    function registerUser(uname, pwd) {
-        let users = getUsers();
-        if(users[uname]) return { ok: false, msg: "Username already exists." };
-        users[uname] = { password: pwd };
-        saveUsers(users);
-        localStorage.setItem(`farmData_${uname}`, JSON.stringify(emptyUserData()));
-        return { ok: true };
-    }
-
-    function loginUser(uname, pwd) {
-        let users = getUsers();
-        if(!users[uname] || users[uname].password !== pwd) return false;
-        currentUser = uname;
-        userDataCache = loadUserData(currentUser);
-        return true;
-    }
-
-    // UI Rendering & Stats
-    function refreshStats() {
-        if(!userDataCache) return;
-        const rb = userDataCache.rabbitBreedings.length;
-        const inc = userDataCache.birdIncubations.length;
-        const gpBreed = userDataCache.guineaPigBreedings.length;
-        const gcBreed = userDataCache.grasscutterBreedings.length;
-        const statsHtml = `<div class="stat-card"><i class="fas fa-rabbit"></i><h3>${rb}</h3><p>Rabbit Breeding</p></div>
-        <div class="stat-card"><i class="fas fa-egg"></i><h3>${inc}</h3><p>Incubations</p></div>
-        <div class="stat-card"><i class="fas fa-paw"></i><h3>${gpBreed}</h3><p>Guinea Events</p></div>
-        <div class="stat-card"><i class="fas fa-leaf"></i><h3>${gcBreed}</h3><p>Grasscutter Records</p></div>`;
-        document.getElementById('statsOverview').innerHTML = statsHtml;
-    }
-
-    // Generic table renderers
-    function renderRabbitTables() {
-        const breedTbody = document.querySelector('#rabbitBreedingTable tbody');
-        breedTbody.innerHTML = userDataCache.rabbitBreedings.map((b, idx) => `<tr><td>${b.date}</td><td>${b.doe}</td><td>${b.buck}</td><td>${b.litter}</td><td><i class="fas fa-trash-alt action-icon" data-type="rabbitBreed" data-idx="${idx}"></i></td></tr>`).join('');
-        const growthTbody = document.querySelector('#rabbitGrowthTable tbody');
-        growthTbody.innerHTML = userDataCache.rabbitGrowths.map((g, idx) => `<tr><td>${g.date}</td><td>${g.rabbitId}</td><td>${g.weight}</td><td>${g.notes || ''}</td><td><i class="fas fa-trash-alt action-icon" data-type="rabbitGrowth" data-idx="${idx}"></i></td></tr>`).join('');
-    }
-    function renderGuineaTables() {
-        document.querySelector('#guineaBreedingTable').innerHTML = `<thead><tr><th>Date</th><th>Dam</th><th>Sire</th><th>Pups</th><th></th></tr></thead><tbody>${userDataCache.guineaPigBreedings.map((b,i)=>`<tr><td>${b.date}</td><td>${b.dam}</td><td>${b.sire}</td><td>${b.litter}</td><td><i class="fas fa-trash-alt action-icon" data-type="guineaBreed" data-idx="${i}"></i></td></tr>`).join('')}</tbody>`;
-        document.querySelector('#guineaGrowthTable').innerHTML = `<thead><tr><th>Date</th><th>Animal ID</th><th>Weight(kg)</th><th></th></tr></thead><tbody>${userDataCache.guineaPigGrowths.map((g,i)=>`<tr><td>${g.date}</td><td>${g.animalId}</td><td>${g.weight}</td><td><i class="fas fa-trash-alt action-icon" data-type="guineaGrowth" data-idx="${i}"></i></td></tr>`).join('')}</tbody>`;
-    }
-    function renderGrasscutterTables() {
-        document.querySelector('#grasscutterBreedingTable').innerHTML = `<thead><tr><th>Date</th><th>Female</th><th>Male</th><th>Offspring</th><th></th></tr></thead><tbody>${userDataCache.grasscutterBreedings.map((b,i)=>`<tr><td>${b.date}</td><td>${b.female}</td><td>${b.male}</td><td>${b.offspring}</td><td><i class="fas fa-trash-alt action-icon" data-type="grasscutterBreed" data-idx="${i}"></i></td></tr>`).join('')}</tbody>`;
-        document.querySelector('#grasscutterGrowthTable').innerHTML = `<thead><tr><th>Date</th><th>Animal ID</th><th>Weight(kg)</th><th></th></tr></thead><tbody>${userDataCache.grasscutterGrowths.map((g,i)=>`<tr><td>${g.date}</td><td>${g.animalId}</td><td>${g.weight}</td><td><i class="fas fa-trash-alt action-icon" data-type="grasscutterGrowth" data-idx="${i}"></i></td></tr>`).join('')}</tbody>`;
-    }
-    function renderIncubationTable() {
-        document.querySelector('#incubationTable tbody').innerHTML = userDataCache.birdIncubations.map((inc,idx)=>`<tr><td>${inc.species}</td><td>${inc.setDate}</td><td>${inc.eggCount}</td><td>${inc.expectedHatch}</td><td><i class="fas fa-trash-alt action-icon" data-type="incubation" data-idx="${idx}"></i></td></tr>`).join('');
-    }
-    function refreshAllUI() {
-        if(!currentUser) return;
-        document.getElementById('currentUserSpan').innerText = currentUser;
-        refreshStats();
-        renderRabbitTables();
-        renderGuineaTables();
-        renderGrasscutterTables();
-        renderIncubationTable();
-        attachDeleteEvents();
-    }
-
-    // attach delete listeners after re-render
-    function attachDeleteEvents() {
-        document.querySelectorAll('.action-icon').forEach(el => {
-            el.removeEventListener('click', handleDelete);
-            el.addEventListener('click', handleDelete);
+        // form submit handler (demo)
+        document.getElementById('sellerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('✅ Your verification request has been submitted! You will be reviewed shortly.');
+            // in real app: POST to /api/sellers
         });
-    }
-    function handleDelete(e) {
-        const target = e.currentTarget;
-        const type = target.dataset.type;
-        const idx = parseInt(target.dataset.idx);
-        if(isNaN(idx)) return;
-        if(type === 'rabbitBreed') userDataCache.rabbitBreedings.splice(idx,1);
-        else if(type === 'rabbitGrowth') userDataCache.rabbitGrowths.splice(idx,1);
-        else if(type === 'guineaBreed') userDataCache.guineaPigBreedings.splice(idx,1);
-        else if(type === 'guineaGrowth') userDataCache.guineaPigGrowths.splice(idx,1);
-        else if(type === 'grasscutterBreed') userDataCache.grasscutterBreedings.splice(idx,1);
-        else if(type === 'grasscutterGrowth') userDataCache.grasscutterGrowths.splice(idx,1);
-        else if(type === 'incubation') userDataCache.birdIncubations.splice(idx,1);
-        updateUserData(userDataCache);
-    }
 
-    // add data handlers
-    function addRabbitBreeding() { let date=document.getElementById('rbDate').value, doe=document.getElementById('rbDoe').value, buck=document.getElementById('rbBuck').value, litter=document.getElementById('rbLitter').value; if(date&&doe&&buck){userDataCache.rabbitBreedings.push({date,doe,buck,litter}); updateUserData(userDataCache); clearFormFields(['rbDate','rbDoe','rbBuck','rbLitter']);} }
-    function addRabbitGrowth(){ let rabbitId=document.getElementById('rgRabbitId').value, date=document.getElementById('rgDate').value, weight=document.getElementById('rgWeight').value, notes=document.getElementById('rgNotes').value; if(rabbitId&&date&&weight){userDataCache.rabbitGrowths.push({rabbitId,date,weight,notes}); updateUserData(userDataCache); clearFormFields(['rgRabbitId','rgDate','rgWeight','rgNotes']);} }
-    function addGuineaBreeding(){ let date=document.getElementById('gpDate').value, dam=document.getElementById('gpDam').value, sire=document.getElementById('gpSire').value, litter=document.getElementById('gpLitter').value; if(date&&dam) {userDataCache.guineaPigBreedings.push({date,dam,sire,litter}); updateUserData(userDataCache);} }
-    function addGuineaGrowth(){ let animalId=document.getElementById('gpAnimalId').value, date=document.getElementById('gpGrowthDate').value, weight=document.getElementById('gpWeight').value; if(animalId&&date&&weight){userDataCache.guineaPigGrowths.push({animalId,date,weight}); updateUserData(userDataCache);} }
-    function addGrasscutterBreeding(){ let date=document.getElementById('gcDate').value, female=document.getElementById('gcFemale').value, male=document.getElementById('gcMale').value, offspring=document.getElementById('gcOffspring').value; if(date&&female){userDataCache.grasscutterBreedings.push({date,female,male,offspring}); updateUserData(userDataCache);} }
-    function addGrasscutterGrowth(){ let animalId=document.getElementById('gcAnimalId').value, date=document.getElementById('gcGrowthDate').value, weight=document.getElementById('gcWeight').value; if(animalId&&date&&weight){userDataCache.grasscutterGrowths.push({animalId,date,weight}); updateUserData(userDataCache);} }
-    function addIncubation(){ let species=document.getElementById('birdSpecies').value, setDate=document.getElementById('incSetDate').value, eggCount=document.getElementById('incEggCount').value, expHatch=document.getElementById('incExpHatch').value; if(species&&setDate){userDataCache.birdIncubations.push({species,setDate,eggCount,expectedHatch:expHatch||'Pending'}); updateUserData(userDataCache);} }
-    function clearFormFields(ids){ ids.forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; }); }
-
-    // Feed Calc
-    function calculateFeed() {
-        let species = document.getElementById('feedSpecies').value;
-        let count = parseInt(document.getElementById('animalCount').value) || 0;
-        let weight = parseFloat(document.getElementById('avgWeightKg').value) || 0;
-        let grams = 0;
-        if(species === 'Rabbit') grams = count * (weight > 0 ? weight*50 : 120);
-        else if(species === 'Guinea Pig') grams = count * 40;
-        else if(species === 'Grasscutter') grams = count * 180;
-        else grams = count * 110;
-        document.getElementById('feedResult').innerHTML = `🐇 Recommended daily feed: <strong>${Math.round(grams)} g</strong> (approx ${(grams/1000).toFixed(2)} kg)`;
-    }
-
-    // Report generator
-    function generateReport() {
-        const rbB = userDataCache.rabbitBreedings.length;
-        const avgLitter = userDataCache.rabbitBreedings.reduce((a,b)=>a+ (parseInt(b.litter)||0),0)/(rbB||1);
-        const incubSuccess = userDataCache.birdIncubations.length;
-        const gpTotal = userDataCache.guineaPigBreedings.length + userDataCache.grasscutterBreedings.length;
-        document.getElementById('reportOutput').innerHTML = `<div><i class="fas fa-chart-bar"></i> <strong>Farming Summary</strong><br>🐇 Rabbit breedings: ${rbB}, avg litter: ${avgLitter.toFixed(1)}<br>🥚 Incubation records: ${incubSuccess}<br>🐹 Guinea + Grasscutter events: ${gpTotal}<br>📈 Growth entries: ${userDataCache.rabbitGrowths.length+userDataCache.guineaPigGrowths.length+userDataCache.grasscutterGrowths.length}<br>✅ Report generated ${new Date().toLocaleString()}</div>`;
-    }
-
-    // Chatbot: simple AI for diagnosis & solutions
-    function chatbotResponse(userMsg) {
-        let msg = userMsg.toLowerCase();
-        if(msg.includes('sneeze') || (msg.includes('rabbit') && msg.includes('nose')))
-            return "🐇 Rabbit sneezing: check for dusty bedding, possible respiratory infection. Ensure ventilation. Consult vet if nasal discharge persists.";
-        if(msg.includes('diarrhea') || msg.includes('loose stool'))
-            return "💩 Diarrhea in small animals: remove fresh greens, provide hay. For rabbits/guinea pigs, possible coccidiosis. Increase fiber, keep hydrated.";
-        if(msg.includes('egg binding') || (msg.includes('bird') && msg.includes('egg')))
-            return "🥚 Egg binding: provide warmth, calcium. Vet may need to administer oxytocin. Immediate care advised.";
-        if(msg.includes('weight loss') || msg.includes('thin'))
-            return "⚖️ Weight loss: check diet quality, deworming. Ensure adequate protein & fresh water. Monitor feed intake.";
-        if(msg.includes('feed') || msg.includes('feeding'))
-            return "🌿 Feeding tip: Rabbits need unlimited hay, guinea pigs vitamin C. Grasscutters eat forage + concentrates. Balance is key.";
-        if(msg.includes('mating') || msg.includes('breeding'))
-            return "❤️ Breeding: ensure females are healthy, optimal age. Keep records of mating dates for due date predictions.";
-        return "🤖 Welcome! I can help with symptoms (sneezing, diarrhea, egg issues), general feeding, and farm management. Ask me anything!";
-    }
-
-    function sendChatMessage() {
-        let input = document.getElementById('chatInput');
-        if(!input.value.trim()) return;
-        let userText = input.value;
-        let chatDiv = document.getElementById('chatMessages');
-        chatDiv.innerHTML += `<div class="chat-bubble user-msg"><strong>You:</strong> ${userText}</div>`;
-        let reply = chatbotResponse(userText);
-        chatDiv.innerHTML += `<div class="chat-bubble bot-msg"><i class="fas fa-robot"></i> ${reply}</div>`;
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-        input.value = '';
-    }
-
-    // Auth UI controllers
-    function showApp() {
-        document.getElementById('authView').style.display = 'none';
-        document.getElementById('appView').style.display = 'block';
-        refreshAllUI();
-    }
-    function logout() { currentUser=null; userDataCache=null; document.getElementById('authView').style.display = 'block'; document.getElementById('appView').style.display = 'none'; clearAuthInputs(); }
-    function clearAuthInputs() { document.getElementById('loginUsername').value=''; document.getElementById('loginPassword').value=''; document.getElementById('regUsername').value=''; document.getElementById('regPassword').value=''; document.getElementById('loginError').innerText=''; document.getElementById('regError').innerText='';}
-    // Tab switching
-    function initTabs() { document.querySelectorAll('.tab-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ let tabId=btn.dataset.tab; document.querySelectorAll('.tab-pane').forEach(pane=>pane.classList.remove('active-pane')); document.getElementById(tabId).classList.add('active-pane'); document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }); }); }
-
-    // Event binding after DOM ready
-    window.onload = () => {
-        initTabs();
-        document.getElementById('showLoginBtn').onclick = () => { document.getElementById('loginForm').style.display='block'; document.getElementById('registerForm').style.display='none'; };
-        document.getElementById('showRegisterBtn').onclick = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='block'; };
-        document.getElementById('doLoginBtn').onclick = () => { let uname=document.getElementById('loginUsername').value, pwd=document.getElementById('loginPassword').value; if(loginUser(uname,pwd)) showApp(); else document.getElementById('loginError').innerText='Invalid credentials'; };
-        document.getElementById('doRegisterBtn').onclick = () => { let uname=document.getElementById('regUsername').value, pwd=document.getElementById('regPassword').value; if(!uname||!pwd){document.getElementById('regError').innerText='Fill all fields';return;} let res=registerUser(uname,pwd); if(res.ok){ alert('Account created! Please login.'); document.getElementById('showLoginBtn').click(); } else document.getElementById('regError').innerText=res.msg; };
-        document.getElementById('logoutBtn').onclick = logout;
-        document.getElementById('addRabbitBreedingBtn').onclick = addRabbitBreeding;
-        document.getElementById('addRabbitGrowthBtn').onclick = addRabbitGrowth;
-        document.getElementById('addGuineaBreedingBtn').onclick = addGuineaBreeding;
-        document.getElementById('addGuineaGrowthBtn').onclick = addGuineaGrowth;
-        document.getElementById('addGrasscutterBreedingBtn').onclick = addGrasscutterBreeding;
-        document.getElementById('addGrasscutterGrowthBtn').onclick = addGrasscutterGrowth;
-        document.getElementById('addIncubationBtn').onclick = addIncubation;
-        document.getElementById('calculateFeedBtn').onclick = calculateFeed;
-        document.getElementById('generateReportBtn').onclick = generateReport;
-        document.getElementById('sendChatBtn').onclick = sendChatMessage;
-        document.getElementById('chatInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChatMessage(); });
-        // show auth by default
-        document.getElementById('authView').style.display = 'block';
-        document.getElementById('appView').style.display = 'none';
-    };
-</script>
+        // optional: GPS location demo
+        document.querySelector('button[type="button"]')?.addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => alert(`📍 Location: ${pos.coords.latitude}, ${pos.coords.longitude}`),
+                    () => alert('Please allow location access.')
+                );
+            } else {
+                alert('Geolocation not supported.');
+            }
+        });
+    </script>
 </body>
 </html>

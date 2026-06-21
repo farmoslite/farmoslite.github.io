@@ -1,277 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FarmTrust · Verified Marketplace</title>
-  <!-- Tailwind + Inter + Font Awesome -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <style>
-    * { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
-    body { background: #fafcf9; }
-    /* professional card & badge */
-    .badge-verified { background: #0b7e3d; color: white; padding: 2px 14px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3px; }
-    .card-hover { transition: all 0.2s ease; }
-    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 30px -12px rgba(0,0,0,0.12); }
-    .hero-bg {
-      background: linear-gradient(145deg, rgba(18, 60, 30, 0.92), rgba(10, 40, 22, 0.88)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80') center/cover no-repeat;
-    }
-    .admin-toggle { cursor: pointer; opacity: 0.6; transition: 0.2s; letter-spacing: 0.5px; }
-    .admin-toggle:hover { opacity: 1; }
-    .admin-panel { background: #f0f5f2; border-radius: 24px; border-left: 6px solid #1e5f3b; }
-    /* page-like sections with subtle separation */
-    .section-card { background: white; border-radius: 32px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
-    .input-field { border: 1px solid #d0d9d2; border-radius: 16px; padding: 0.75rem 1rem; width: 100%; transition: 0.15s; background: white; }
-    .input-field:focus { border-color: #1f8b4c; box-shadow: 0 0 0 3px rgba(31, 139, 76, 0.15); outline: none; }
-    .btn-primary { background: #1a6e3a; color: white; font-weight: 600; padding: 0.75rem 2rem; border-radius: 60px; transition: 0.2s; }
-    .btn-primary:hover { background: #0f552b; transform: scale(1.02); }
-    .btn-outline { background: transparent; border: 1.5px solid #1a6e3a; color: #1a6e3a; font-weight: 600; padding: 0.7rem 2rem; border-radius: 60px; transition: 0.2s; }
-    .btn-outline:hover { background: #1a6e3a; color: white; }
-    /* map placeholder */
-    .map-placeholder { background: #e4ece6; border-radius: 20px; border: 1px dashed #7fa38b; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FarmTrust · Verified Marketplace</title>
+    <!-- Tailwind + Inter + Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; background: #fafbf8; }
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(20, 70, 30, 0.92), rgba(28, 88, 44, 0.85)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1400&q=80') center/cover no-repeat;
+        }
+        .badge-verified { background: #0b7e3d; color: white; padding: 2px 14px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3px; }
+        .card-hover { transition: all 0.2s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 30px -12px rgba(0,0,0,0.12); }
+        .admin-toggle { cursor: pointer; opacity: 0.5; transition: 0.2s; }
+        .admin-toggle:hover { opacity: 1; }
+        .admin-panel { background: #f1f5f9; border-radius: 20px; border-left: 6px solid #1e5f3b; }
+        .window-btn { transition: all 0.15s; }
+        .window-btn:hover { transform: scale(1.02); box-shadow: 0 8px 20px -6px rgba(0,0,0,0.15); }
+        /* mobile friendly */
+        @media (max-width: 640px) { .hero-bg { background-position: 30% center; } }
+    </style>
 </head>
 <body>
 
-<!-- ========== HERO ========== -->
-<section class="hero-bg text-white min-h-[88vh] flex items-center relative">
-  <div class="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-3 z-10">
-    <i class="fas fa-seedling text-4xl text-emerald-200"></i>
-    <span class="text-2xl md:text-3xl font-bold tracking-tight">FarmTrust</span>
-  </div>
-  <div class="container mx-auto px-6 md:px-12 pt-28 pb-20 relative z-10">
-    <div class="max-w-3xl">
-      <h1 class="text-4xl md:text-7xl font-bold leading-tight mb-5">
-        Trusted <span class="text-emerald-200">Farmers</span><br/>Verified <span class="text-emerald-200">Marketplace</span>
-      </h1>
-      <p class="text-lg md:text-xl text-emerald-50/90 max-w-xl mb-10">
-        Connecting trusted farmers and buyers through verified seller registration.
-      </p>
-      <div class="flex flex-wrap gap-5">
-        <a href="#register" class="btn-primary inline-flex items-center gap-2 text-base shadow-lg"><i class="fas fa-user-plus"></i> Register as Seller</a>
-        <a href="#marketplace" class="bg-white/20 backdrop-blur-sm border border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/30 transition inline-flex items-center gap-2"><i class="fas fa-sign-in-alt"></i> Login</a>
-      </div>
-    </div>
-  </div>
-  <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-8 text-emerald-100/70 text-sm font-medium">
-    <span><i class="fas fa-shield-alt mr-2"></i> KYC verified</span>
-    <span><i class="fas fa-store mr-2"></i> 200+ sellers</span>
-    <span><i class="fas fa-handshake mr-2"></i> Buyer protection</span>
-  </div>
-</section>
-
-<!-- ========== REGISTER + KYC (page-like) ========== -->
-<section id="register" class="py-16 md:py-24 bg-[#f4f8f5]">
-  <div class="container mx-auto px-6 md:px-12">
-    <div class="text-center mb-14">
-      <h2 class="text-4xl font-bold text-emerald-900">Seller Verification</h2>
-      <p class="text-gray-600 mt-2 text-lg">Complete your profile &amp; KYC to join the trusted marketplace</p>
-    </div>
-
-    <div class="grid lg:grid-cols-5 gap-10">
-      <!-- FORM (main) -->
-      <div class="lg:col-span-3 section-card p-8 md:p-10">
-        <form id="sellerForm" class="space-y-7">
-          <!-- Personal -->
-          <div class="grid sm:grid-cols-2 gap-5">
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Full name *</label><input type="text" required class="input-field" placeholder="John Doe" /></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Phone *</label><input type="tel" required class="input-field" placeholder="+234 800 000 0000" /></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp *</label><input type="tel" required class="input-field" placeholder="+234 800 000 0000" /></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Email *</label><input type="email" required class="input-field" placeholder="farmer@example.com" /></div>
-            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Profile picture</label><input type="file" accept="image/*" class="input-field p-2 file:mr-4 file:py-2 file:px-5 file:rounded-full file:border-0 file:bg-emerald-50 file:text-emerald-700 file:font-medium" /></div>
-          </div>
-          <!-- Farm -->
-          <div class="grid sm:grid-cols-2 gap-5">
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Farm name *</label><input type="text" required class="input-field" placeholder="Green Valley Farms" /></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Farming category</label>
-              <select class="input-field bg-white">
-                <option>Crops</option><option>Livestock</option><option>Poultry</option><option>Fishery</option><option>Mixed</option>
-              </select>
+    <!-- ===== HERO ===== -->
+    <section class="hero-bg text-white min-h-[90vh] flex items-center relative">
+        <div class="absolute top-6 left-6 md:top-10 md:left-12 flex items-center gap-3">
+            <i class="fas fa-seedling text-3xl text-emerald-300"></i>
+            <span class="text-2xl font-bold tracking-tight">FarmTrust</span>
+        </div>
+        <div class="container mx-auto px-6 md:px-12 pt-24 pb-16">
+            <div class="max-w-3xl">
+                <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
+                    Verified <span class="text-emerald-200">Farmers</span>, <br/>Trusted Buyers
+                </h1>
+                <p class="text-lg md:text-xl text-emerald-50/90 max-w-xl mb-8">
+                    Connecting trusted farmers and buyers through verified seller registration.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <!-- Register opens new window -->
+                    <button onclick="openRegisterWindow()" class="bg-white text-emerald-800 px-8 py-3 rounded-full font-semibold shadow-lg hover:bg-emerald-50 transition flex items-center gap-2 window-btn">
+                        <i class="fas fa-user-plus"></i> Register as Seller
+                    </button>
+                    <!-- Login opens new window -->
+                    <button onclick="openLoginWindow()" class="bg-emerald-700/70 backdrop-blur-sm border border-white/30 px-8 py-3 rounded-full font-semibold hover:bg-emerald-600/80 transition flex items-center gap-2 window-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
             </div>
-            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Products available</label><input type="text" class="input-field" placeholder="Maize, cassava, tomatoes, eggs" /></div>
-            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Farm description</label><textarea rows="2" class="input-field" placeholder="Describe your farm, practices, etc."></textarea></div>
-          </div>
-          <!-- Location -->
-          <div class="grid sm:grid-cols-3 gap-5">
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Country</label><input type="text" class="input-field" value="Nigeria" /></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">State</label><input type="text" class="input-field" placeholder="Oyo" /></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">City</label><input type="text" class="input-field" placeholder="Ibadan" /></div>
-            <div class="sm:col-span-3"><label class="block text-sm font-medium text-gray-700 mb-1">Farm address</label><input type="text" class="input-field" placeholder="Km 12, Oyo road, Ibadan" /></div>
-          </div>
-          <!-- GPS + Map -->
-          <div class="bg-emerald-50/70 p-5 rounded-2xl border border-emerald-100 space-y-3">
-            <div class="flex flex-wrap items-center gap-3">
-              <i class="fas fa-map-pin text-emerald-700 text-xl"></i>
-              <button type="button" class="bg-emerald-700 text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-emerald-800 transition shadow-sm">📍 Get GPS location</button>
-              <span class="text-xs text-gray-500">or drag map marker</span>
+        </div>
+        <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-8 text-emerald-100/60 text-sm">
+            <span><i class="fas fa-shield-alt mr-1"></i> KYC verified</span>
+            <span><i class="fas fa-store mr-1"></i> 200+ sellers</span>
+            <span><i class="fas fa-handshake mr-1"></i> Buyer protection</span>
+        </div>
+    </section>
+
+    <!-- ===== MARKETPLACE PREVIEW (remains on main page) ===== -->
+    <section id="marketplace" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-emerald-900">Marketplace <span class="text-emerald-600">preview</span></h2>
+                <span class="bg-emerald-100 text-emerald-800 px-4 py-1 rounded-full text-sm font-medium"><i class="fas fa-store"></i> 6 verified sellers</span>
             </div>
-            <div class="map-placeholder w-full h-44 flex items-center justify-center text-gray-500 text-sm">
-              <i class="fas fa-map-marked-alt mr-2 text-emerald-600"></i> Google Maps preview
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- card 1 -->
+                <div class="card-hover bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=80" class="h-40 w-full object-cover" alt="farm" />
+                    <div class="p-5">
+                        <div class="flex items-center justify-between"><h3 class="font-bold text-lg">Green Valley</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
+                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Ibadan, Nigeria</p>
+                        <p class="text-sm text-gray-600 mt-2">Fresh organic tomatoes, peppers &amp; cassava</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-xs bg-emerald-50 px-3 py-1 rounded-full">Crops</span>
+                            <a href="#" class="bg-[#25D366] text-white px-4 py-1.5 rounded-full text-sm flex items-center gap-1 hover:bg-[#128C7E] transition"><i class="fab fa-whatsapp"></i> Contact</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- card 2 -->
+                <div class="card-hover bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1589924691995-4002509d3c7a?w=400&q=80" class="h-40 w-full object-cover" alt="farm" />
+                    <div class="p-5">
+                        <div class="flex items-center justify-between"><h3 class="font-bold text-lg">Palm Grove</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
+                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Akure, Nigeria</p>
+                        <p class="text-sm text-gray-600 mt-2">Palm oil, plantain, cocoa beans</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-xs bg-emerald-50 px-3 py-1 rounded-full">Mixed</span>
+                            <a href="#" class="bg-[#25D366] text-white px-4 py-1.5 rounded-full text-sm flex items-center gap-1 hover:bg-[#128C7E] transition"><i class="fab fa-whatsapp"></i> Contact</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- card 3 -->
+                <div class="card-hover bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=400&q=80" class="h-40 w-full object-cover" alt="farm" />
+                    <div class="p-5">
+                        <div class="flex items-center justify-between"><h3 class="font-bold text-lg">Dairy Plus</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
+                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Jos, Nigeria</p>
+                        <p class="text-sm text-gray-600 mt-2">Fresh milk, yogurt &amp; cheese</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-xs bg-emerald-50 px-3 py-1 rounded-full">Livestock</span>
+                            <a href="#" class="bg-[#25D366] text-white px-4 py-1.5 rounded-full text-sm flex items-center gap-1 hover:bg-[#128C7E] transition"><i class="fab fa-whatsapp"></i> Contact</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+            <p class="text-center text-gray-500 text-sm mt-8"><i class="fas fa-info-circle"></i> Only approved sellers can post adverts.</p>
+        </div>
+    </section>
 
-          <!-- KYC UPLOAD -->
-          <div class="border-t border-gray-200 pt-6">
-            <h4 class="font-bold text-emerald-800 flex items-center gap-2 text-lg"><i class="fas fa-id-card"></i> KYC Upload</h4>
-            <div class="grid sm:grid-cols-2 gap-5 mt-4">
-              <div><label class="block text-sm font-medium text-gray-700 mb-1">Government ID *</label><input type="file" required class="input-field p-2" /></div>
-              <div><label class="block text-sm font-medium text-gray-700 mb-1">Selfie photo *</label><input type="file" required class="input-field p-2" /></div>
-              <div><label class="block text-sm font-medium text-gray-700 mb-1">Farm pictures</label><input type="file" multiple class="input-field p-2" /></div>
-              <div><label class="block text-sm font-medium text-gray-700 mb-1">Product pictures</label><input type="file" multiple class="input-field p-2" /></div>
+    <!-- ===== TRUST & SECURITY (standalone) ===== -->
+    <section class="py-12 bg-emerald-50/60">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="grid md:grid-cols-4 gap-6 text-center">
+                <div class="bg-white p-6 rounded-2xl shadow-sm"><i class="fas fa-check-circle text-emerald-600 text-3xl mb-2"></i><h4 class="font-bold">Verified farmers</h4><p class="text-sm text-gray-500">Every seller KYC checked</p></div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm"><i class="fas fa-lock text-emerald-600 text-3xl mb-2"></i><h4 class="font-bold">Secure KYC</h4><p class="text-sm text-gray-500">Encrypted document storage</p></div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm"><i class="fas fa-handshake text-emerald-600 text-3xl mb-2"></i><h4 class="font-bold">Buyer protection</h4><p class="text-sm text-gray-500">Dispute resolution &amp; escrow</p></div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm"><i class="fas fa-shield-alt text-emerald-600 text-3xl mb-2"></i><h4 class="font-bold">Scam reduction</h4><p class="text-sm text-gray-500">Active monitoring &amp; reporting</p></div>
             </div>
-            <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl mt-5 flex items-center gap-3 text-amber-800 text-sm">
-              <i class="fas fa-clock text-amber-600 text-lg"></i> Your verification will be reviewed before approval.
+        </div>
+    </section>
+
+    <!-- ===== ADMIN PANEL (hidden toggle on main) ===== -->
+    <section class="py-8 bg-gray-100/70">
+        <div class="container mx-auto px-6 md:px-12 max-w-5xl">
+            <div class="admin-toggle text-center text-gray-400 text-xs uppercase tracking-wider" onclick="toggleAdmin()">
+                <i class="fas fa-user-cog"></i> admin access
             </div>
-          </div>
-
-          <button type="submit" class="w-full btn-primary text-lg py-4 shadow-lg flex items-center justify-center gap-3">
-            <i class="fas fa-check-circle"></i> Submit for Verification
-          </button>
-        </form>
-      </div>
-
-      <!-- SIDEBAR: Trust & Security + WhatsApp -->
-      <div class="lg:col-span-2 space-y-7">
-        <div class="section-card p-7 bg-white">
-          <h3 class="font-bold text-emerald-900 flex items-center gap-2 text-xl"><i class="fas fa-shield-alt text-emerald-600"></i> Trust & Security</h3>
-          <ul class="mt-5 space-y-4 text-sm">
-            <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-0.5 text-base"></i> <span><strong class="text-gray-800">Verified farmers</strong> – every seller is KYC checked</span></li>
-            <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-0.5 text-base"></i> <span><strong class="text-gray-800">Secure KYC</strong> – encrypted document storage</span></li>
-            <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-0.5 text-base"></i> <span><strong class="text-gray-800">Buyer protection</strong> – dispute resolution &amp; escrow</span></li>
-            <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-0.5 text-base"></i> <span><strong class="text-gray-800">Scam reduction</strong> – active monitoring &amp; reporting</span></li>
-          </ul>
+            <div id="adminPanel" class="mt-4 admin-panel p-6 hidden">
+                <h4 class="font-bold text-gray-700 flex items-center gap-2"><i class="fas fa-gavel text-emerald-700"></i> Admin Dashboard</h4>
+                <div class="grid md:grid-cols-3 gap-4 mt-4 text-sm">
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="font-semibold">Pending KYC</span> <span class="block text-2xl font-bold text-amber-600">4</span> <button class="mt-2 bg-emerald-600 text-white px-3 py-1 rounded-full text-xs">Review</button></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="font-semibold">Active sellers</span> <span class="block text-2xl font-bold text-emerald-700">12</span> <button class="mt-2 bg-emerald-600 text-white px-3 py-1 rounded-full text-xs">Manage</button></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="font-semibold">Adverts</span> <span class="block text-2xl font-bold text-blue-600">8</span> <button class="mt-2 bg-emerald-600 text-white px-3 py-1 rounded-full text-xs">Moderate</button></div>
+                </div>
+                <div class="flex flex-wrap gap-3 mt-4">
+                    <button class="bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-200 transition"><i class="fas fa-user-slash mr-1"></i> Remove account</button>
+                    <button class="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-200 transition"><i class="fas fa-check-double mr-1"></i> Approve selected</button>
+                    <button class="bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-300 transition"><i class="fas fa-undo-alt mr-1"></i> Reject</button>
+                </div>
+                <p class="text-xs text-gray-400 mt-3 border-t pt-3">Admin functions (hidden) – review, approve/reject KYC, manage adverts, remove accounts.</p>
+            </div>
         </div>
-        <div class="section-card p-7 bg-white border border-gray-100">
-          <h4 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fab fa-whatsapp text-[#25D366] text-xl"></i> WhatsApp group</h4>
-          <p class="text-sm text-gray-500 mt-2">After verification, you'll be added to the official FarmTrust WhatsApp group.</p>
-          <button class="mt-4 bg-[#25D366] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#128C7E] transition shadow-sm"><i class="fab fa-whatsapp mr-2"></i> Join preview</button>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-emerald-900 text-emerald-50 py-8">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2"><i class="fas fa-seedling text-emerald-300"></i> <span class="font-bold">FarmTrust</span></div>
+            <div class="text-sm opacity-80">© 2026 · Verified marketplace</div>
+            <div class="flex gap-4 text-emerald-300"><i class="fab fa-github"></i><i class="fab fa-twitter"></i><i class="fab fa-whatsapp"></i></div>
         </div>
-        <!-- extra: why verify -->
-        <div class="bg-emerald-900/5 p-5 rounded-2xl border border-emerald-100">
-          <p class="text-xs text-gray-600"><i class="fas fa-check-circle text-emerald-600 mr-1"></i> 100% verified sellers • secure transactions • farm-to-table</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </footer>
 
-<!-- ========== MARKETPLACE PREVIEW ========== -->
-<section id="marketplace" class="py-16 md:py-24 bg-white">
-  <div class="container mx-auto px-6 md:px-12">
-    <div class="flex flex-wrap justify-between items-end mb-10">
-      <div>
-        <h2 class="text-4xl font-bold text-emerald-900">Marketplace <span class="text-emerald-600">preview</span></h2>
-        <p class="text-gray-500 mt-1">Verified sellers &amp; their products</p>
-      </div>
-      <span class="bg-emerald-100 text-emerald-800 px-5 py-2 rounded-full text-sm font-medium"><i class="fas fa-store mr-2"></i> 6 verified sellers</span>
-    </div>
+    <script>
+        // ----- open windows: login, signup, verification (all in separate windows) -----
+        function openLoginWindow() {
+            const win = window.open('', '_blank', 'width=480,height=600,scrollbars=yes,resizable=yes');
+            if (!win) { alert('Please allow popups for this site.'); return; }
+            win.document.write(loginPageHTML());
+            win.document.close();
+        }
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
-      <!-- card 1 -->
-      <div class="card-hover bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500&q=80" class="h-48 w-full object-cover" alt="farm" />
-        <div class="p-6">
-          <div class="flex items-center justify-between"><h3 class="font-bold text-xl">Green Valley</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
-          <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Ibadan, Nigeria</p>
-          <p class="text-sm text-gray-600 mt-2">Fresh organic tomatoes, peppers &amp; cassava</p>
-          <div class="flex items-center justify-between mt-4">
-            <span class="text-xs bg-emerald-50 px-4 py-1.5 rounded-full font-medium">Crops</span>
-            <a href="#" class="bg-[#25D366] text-white px-5 py-2 rounded-full text-sm flex items-center gap-2 hover:bg-[#128C7E] transition shadow-sm"><i class="fab fa-whatsapp"></i> Contact</a>
-          </div>
-        </div>
-      </div>
-      <!-- card 2 -->
-      <div class="card-hover bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1589924691995-4002509d3c7a?w=500&q=80" class="h-48 w-full object-cover" alt="farm" />
-        <div class="p-6">
-          <div class="flex items-center justify-between"><h3 class="font-bold text-xl">Palm Grove</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
-          <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Akure, Nigeria</p>
-          <p class="text-sm text-gray-600 mt-2">Palm oil, plantain, cocoa beans</p>
-          <div class="flex items-center justify-between mt-4">
-            <span class="text-xs bg-emerald-50 px-4 py-1.5 rounded-full font-medium">Mixed</span>
-            <a href="#" class="bg-[#25D366] text-white px-5 py-2 rounded-full text-sm flex items-center gap-2 hover:bg-[#128C7E] transition shadow-sm"><i class="fab fa-whatsapp"></i> Contact</a>
-          </div>
-        </div>
-      </div>
-      <!-- card 3 -->
-      <div class="card-hover bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=500&q=80" class="h-48 w-full object-cover" alt="farm" />
-        <div class="p-6">
-          <div class="flex items-center justify-between"><h3 class="font-bold text-xl">Dairy Plus</h3><span class="badge-verified"><i class="fas fa-check-circle mr-1"></i> Verified</span></div>
-          <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-emerald-600 mr-1"></i> Jos, Nigeria</p>
-          <p class="text-sm text-gray-600 mt-2">Fresh milk, yogurt &amp; cheese</p>
-          <div class="flex items-center justify-between mt-4">
-            <span class="text-xs bg-emerald-50 px-4 py-1.5 rounded-full font-medium">Livestock</span>
-            <a href="#" class="bg-[#25D366] text-white px-5 py-2 rounded-full text-sm flex items-center gap-2 hover:bg-[#128C7E] transition shadow-sm"><i class="fab fa-whatsapp"></i> Contact</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p class="text-center text-gray-500 text-sm mt-10 border-t border-gray-200 pt-6"><i class="fas fa-info-circle mr-1"></i> Only approved sellers can post adverts.</p>
-  </div>
-</section>
+        function openRegisterWindow() {
+            const win = window.open('', '_blank', 'width=680,height=800,scrollbars=yes,resizable=yes');
+            if (!win) { alert('Please allow popups for this site.'); return; }
+            win.document.write(registrationPageHTML());
+            win.document.close();
+        }
 
-<!-- ========== ADMIN PANEL (hidden toggle) ========== -->
-<section class="py-10 bg-[#f4f8f5]">
-  <div class="container mx-auto px-6 md:px-12 max-w-4xl">
-    <div class="admin-toggle text-center text-gray-400 text-xs uppercase tracking-widest" onclick="toggleAdmin()">
-      <i class="fas fa-user-cog mr-1"></i> admin access
-    </div>
-    <div id="adminPanel" class="mt-4 admin-panel p-7 hidden">
-      <h4 class="font-bold text-gray-800 flex items-center gap-3 text-lg"><i class="fas fa-gavel text-emerald-700"></i> Admin Dashboard</h4>
-      <div class="grid md:grid-cols-3 gap-5 mt-5">
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100"><span class="font-semibold text-gray-600">Pending KYC</span> <span class="block text-3xl font-bold text-amber-600">4</span> <button class="mt-2 bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-medium hover:bg-emerald-700 transition">Review</button></div>
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100"><span class="font-semibold text-gray-600">Active sellers</span> <span class="block text-3xl font-bold text-emerald-700">12</span> <button class="mt-2 bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-medium hover:bg-emerald-700 transition">Manage</button></div>
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100"><span class="font-semibold text-gray-600">Adverts</span> <span class="block text-3xl font-bold text-blue-600">8</span> <button class="mt-2 bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-medium hover:bg-emerald-700 transition">Moderate</button></div>
-      </div>
-      <div class="flex flex-wrap gap-3 mt-6">
-        <button class="bg-red-100 text-red-700 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-red-200 transition border border-red-200"><i class="fas fa-user-slash mr-2"></i> Remove account</button>
-        <button class="bg-blue-100 text-blue-700 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-200 transition border border-blue-200"><i class="fas fa-check-double mr-2"></i> Approve selected</button>
-        <button class="bg-gray-200 text-gray-600 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-300 transition border border-gray-300"><i class="fas fa-undo-alt mr-2"></i> Reject</button>
-      </div>
-      <p class="text-xs text-gray-400 mt-4 border-t pt-4">Admin functions – review, approve/reject KYC, manage adverts, remove accounts.</p>
-    </div>
-  </div>
-</section>
+        // ----- helper: login page (full HTML) -----
+        function loginPageHTML() {
+            return `
+            <!DOCTYPE html>
+            <html><head><title>FarmTrust · Login</title>
+            <script src="https://cdn.tailwindcss.com"><\/script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+            <style>body{font-family:'Inter',sans-serif;background:#f1f5f0;}</style>
+            </head>
+            <body class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl p-8">
+                    <div class="text-center"><i class="fas fa-seedling text-4xl text-emerald-700"></i><h2 class="text-2xl font-bold mt-2">Welcome back</h2><p class="text-gray-500 text-sm">Log in to your FarmTrust account</p></div>
+                    <form class="mt-6 space-y-4" onsubmit="alert('Login demo — connect to backend');return false;">
+                        <div><label class="block text-sm font-medium text-gray-700">Email</label><input type="email" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="farmer@example.com" /></div>
+                        <div><label class="block text-sm font-medium text-gray-700">Password</label><input type="password" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="••••••••" /></div>
+                        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl shadow-md transition"><i class="fas fa-sign-in-alt mr-2"></i> Login</button>
+                    </form>
+                    <p class="text-center text-sm text-gray-500 mt-4">Don't have an account? <a href="#" onclick="window.close();" class="text-emerald-700 font-medium">Sign up</a></p>
+                    <button onclick="window.close()" class="mt-2 text-xs text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i> close</button>
+                </div>
+            </body></html>
+            `;
+        }
 
-<!-- ========== FOOTER ========== -->
-<footer class="bg-emerald-900 text-emerald-50 py-8">
-  <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-    <div class="flex items-center gap-2"><i class="fas fa-seedling text-emerald-300 text-xl"></i> <span class="font-bold text-xl">FarmTrust</span></div>
-    <div class="text-sm opacity-70">© 2026 · Verified marketplace</div>
-    <div class="flex gap-5 text-emerald-300 text-lg"><i class="fab fa-github"></i><i class="fab fa-twitter"></i><i class="fab fa-whatsapp"></i></div>
-  </div>
-</footer>
+        // ----- helper: registration + KYC form (full page) -----
+        function registrationPageHTML() {
+            return `
+            <!DOCTYPE html>
+            <html><head><title>FarmTrust · Register & KYC</title>
+            <script src="https://cdn.tailwindcss.com"><\/script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+            <style>body{font-family:'Inter',sans-serif;background:#fafbf8;}</style>
+            </head>
+            <body class="p-4 md:p-8">
+                <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-6 md:p-8">
+                    <div class="flex items-center justify-between"><h2 class="text-2xl font-bold text-emerald-800"><i class="fas fa-user-plus mr-2"></i>Seller Verification</h2><button onclick="window.close()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
+                    <p class="text-gray-500 text-sm mb-6">Complete your profile &amp; KYC to join the trusted marketplace</p>
+                    <form id="regForm" class="space-y-5" onsubmit="alert('✅ Verification submitted! You will be reviewed.');return false;">
+                        <!-- Personal -->
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Full name *</label><input type="text" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="John Doe" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Phone *</label><input type="tel" required class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="+234 800 000 0000" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">WhatsApp *</label><input type="tel" required class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="+234 800 000 0000" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Email *</label><input type="email" required class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="farmer@example.com" /></div>
+                            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700">Profile picture</label><input type="file" accept="image/*" class="w-full border border-gray-300 rounded-xl px-4 py-2" /></div>
+                        </div>
+                        <!-- Farm -->
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Farm name *</label><input type="text" required class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="Green Valley Farms" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Farming category</label>
+                                <select class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white"><option>Crops</option><option>Livestock</option><option>Poultry</option><option>Fishery</option><option>Mixed</option></select>
+                            </div>
+                            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700">Products available</label><input type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="Maize, cassava, tomatoes" /></div>
+                            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700">Farm description</label><textarea rows="2" class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="Describe your farm..."></textarea></div>
+                        </div>
+                        <!-- Location -->
+                        <div class="grid sm:grid-cols-3 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Country</label><input type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3" value="Nigeria" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">State</label><input type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="Oyo" /></div>
+                            <div><label class="block text-sm font-medium text-gray-700">City</label><input type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="Ibadan" /></div>
+                            <div class="sm:col-span-3"><label class="block text-sm font-medium text-gray-700">Farm address</label><input type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="Km 12, Oyo road" /></div>
+                        </div>
+                        <!-- GPS + Map -->
+                        <div class="flex flex-wrap items-center gap-4 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+                            <i class="fas fa-map-pin text-emerald-700 text-xl"></i>
+                            <button type="button" class="bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-emerald-800 transition">📍 Get GPS location</button>
+                            <span class="text-xs text-gray-500">or drag map marker</span>
+                            <div class="w-full h-32 bg-gray-200 rounded-xl mt-2 flex items-center justify-center text-gray-400 border border-gray-300"><i class="fas fa-map-marked-alt mr-2"></i> Map preview (Google Maps)</div>
+                        </div>
+                        <!-- KYC -->
+                        <div class="border-t border-gray-200 pt-5">
+                            <h4 class="font-semibold text-emerald-800 flex items-center gap-2"><i class="fas fa-id-card"></i> KYC Upload</h4>
+                            <div class="grid sm:grid-cols-2 gap-4 mt-3">
+                                <div><label class="block text-sm font-medium text-gray-700">Government ID *</label><input type="file" required class="w-full border border-gray-300 rounded-xl px-4 py-2" /></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Selfie photo *</label><input type="file" required class="w-full border border-gray-300 rounded-xl px-4 py-2" /></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Farm pictures</label><input type="file" multiple class="w-full border border-gray-300 rounded-xl px-4 py-2" /></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Product pictures</label><input type="file" multiple class="w-full border border-gray-300 rounded-xl px-4 py-2" /></div>
+                            </div>
+                            <p class="text-sm text-amber-700 bg-amber-50 p-3 rounded-xl mt-4 flex items-center gap-2"><i class="fas fa-clock"></i> Your verification will be reviewed before approval.</p>
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-4 rounded-xl shadow-md transition flex items-center justify-center gap-2"><i class="fas fa-check-circle"></i> Submit for Verification</button>
+                    </form>
+                    <p class="text-xs text-gray-400 mt-4 text-center">FarmTrust · secure KYC</p>
+                </div>
+            </body></html>
+            `;
+        }
 
-<script>
-  // toggle admin panel
-  function toggleAdmin() {
-    document.getElementById('adminPanel').classList.toggle('hidden');
-  }
+        // ----- admin toggle (main) -----
+        function toggleAdmin() {
+            document.getElementById('adminPanel').classList.toggle('hidden');
+        }
 
-  // form submit
-  document.getElementById('sellerForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    alert('✅ Verification request submitted! You will be reviewed shortly.');
-    // In production: POST to /api/sellers
-  });
-
-  // GPS demo
-  document.querySelector('button[type="button"]')?.addEventListener('click', function() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => alert(`📍 Location: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`),
-        () => alert('Please allow location access.')
-      );
-    } else {
-      alert('Geolocation not supported.');
-    }
-  });
-</script>
+        // GPS demo on main (if any)
+        document.querySelector('button[type="button"]')?.addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => alert(`📍 Location: ${pos.coords.latitude}, ${pos.coords.longitude}`),
+                    () => alert('Please allow location access.')
+                );
+            } else { alert('Geolocation not supported.'); }
+        });
+    </script>
 
 </body>
 </html>

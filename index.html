@@ -36,9 +36,9 @@
     }
     .admin-toggle {
       cursor: pointer;
-      opacity: 0.5;
+      opacity: 0.4;
       transition: 0.2s;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       letter-spacing: 1px;
     }
     .admin-toggle:hover { opacity: 1; }
@@ -53,15 +53,18 @@
       0% { opacity: 0; transform: translateY(12px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-    /* custom scroll */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #e9ecef; border-radius: 10px; }
     ::-webkit-scrollbar-thumb { background: #2b7a4b; border-radius: 10px; }
+    .donation-card {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 1px solid #86efac;
+    }
   </style>
 </head>
-<body class="antialiased text-gray-800">
+<body>
 
-<!-- ====== GLOBAL NAV / HEADER ====== -->
+<!-- ====== GLOBAL NAV ====== -->
 <header class="hero-grad text-white shadow-lg sticky top-0 z-30">
   <div class="container mx-auto px-6 py-3 flex flex-wrap items-center justify-between">
     <div class="flex items-center gap-2 text-xl font-bold tracking-tight">
@@ -73,13 +76,14 @@
       <button onclick="showWindow('home')" class="hover:text-emerald-200 transition px-3 py-1 rounded-full hover:bg-white/10"><i class="fas fa-home"></i> Home</button>
       <button onclick="showWindow('login')" class="hover:text-emerald-200 transition px-3 py-1 rounded-full hover:bg-white/10"><i class="fas fa-sign-in-alt"></i> Login</button>
       <button onclick="showWindow('register')" class="bg-white text-emerald-800 px-4 py-1.5 rounded-full font-semibold hover:bg-emerald-50 transition shadow-md"><i class="fas fa-user-plus"></i> Sign up</button>
+      <button onclick="showWindow('donate')" class="bg-amber-400 text-emerald-900 px-4 py-1.5 rounded-full font-semibold hover:bg-amber-300 transition shadow-md"><i class="fas fa-heart"></i> Donate</button>
     </div>
   </div>
 </header>
 
 <main class="container mx-auto px-4 py-8 max-w-7xl">
 
-  <!-- ====== HOME WINDOW (default) ====== -->
+  <!-- ====== HOME WINDOW ====== -->
   <div id="window-home" class="window-container active">
     <!-- hero -->
     <section class="rounded-3xl hero-grad text-white p-8 md:p-16 mb-12 shadow-2xl" style="background: linear-gradient(135deg, #0f4a24, #1f6e3a);">
@@ -89,12 +93,14 @@
         <div class="flex flex-wrap gap-4 mt-8">
           <button onclick="showWindow('register')" class="bg-white text-emerald-800 px-8 py-3 rounded-full font-semibold shadow-lg hover:bg-emerald-50 transition flex items-center gap-2"><i class="fas fa-user-check"></i> Register as Seller</button>
           <button onclick="showWindow('login')" class="bg-emerald-700/60 backdrop-blur-sm border border-white/30 px-8 py-3 rounded-full font-semibold hover:bg-emerald-600/70 transition flex items-center gap-2"><i class="fas fa-sign-in-alt"></i> Login</button>
+          <button onclick="showWindow('donate')" class="bg-amber-400/80 backdrop-blur-sm border border-white/30 px-8 py-3 rounded-full font-semibold hover:bg-amber-400/90 transition flex items-center gap-2 text-emerald-900"><i class="fas fa-heart"></i> Support us</button>
         </div>
       </div>
       <div class="mt-10 flex flex-wrap gap-6 text-emerald-100/70 text-sm">
         <span><i class="fas fa-shield-alt mr-1"></i> KYC verified</span>
         <span><i class="fas fa-store mr-1"></i> 200+ sellers</span>
         <span><i class="fas fa-handshake mr-1"></i> Buyer protection</span>
+        <span><i class="fas fa-seedling mr-1"></i> Community funded</span>
       </div>
     </section>
 
@@ -127,17 +133,8 @@
         <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition"><i class="fas fa-arrow-right-to-bracket mr-2"></i> Login</button>
         <p class="text-sm text-center mt-4 text-gray-500">Don't have an account? <button onclick="showWindow('register')" class="text-emerald-700 font-semibold hover:underline">Sign up</button></p>
       </form>
-      <!-- admin hidden toggle inside login -->
-      <div class="mt-6 text-center admin-toggle" onclick="toggleAdmin()"><i class="fas fa-user-cog"></i> admin access</div>
-      <div id="adminPanel" class="mt-4 hidden bg-gray-50 p-4 rounded-xl border border-gray-200">
-        <h4 class="font-bold text-gray-700 flex items-center gap-2"><i class="fas fa-gavel text-emerald-700"></i> Admin Dashboard</h4>
-        <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
-          <div class="bg-white p-2 rounded"><span class="font-semibold">Pending KYC</span><div class="text-xl font-bold text-amber-600">4</div><button class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[0.6rem]">Review</button></div>
-          <div class="bg-white p-2 rounded"><span class="font-semibold">Active sellers</span><div class="text-xl font-bold text-emerald-700">12</div><button class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[0.6rem]">Manage</button></div>
-          <div class="bg-white p-2 rounded"><span class="font-semibold">Adverts</span><div class="text-xl font-bold text-blue-600">8</div><button class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[0.6rem]">Moderate</button></div>
-        </div>
-        <div class="flex flex-wrap gap-2 mt-3"><button class="bg-red-100 text-red-700 px-3 py-1 rounded text-xs">Remove account</button><button class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs">Approve</button><button class="bg-gray-200 text-gray-600 px-3 py-1 rounded text-xs">Reject</button></div>
-      </div>
+      <!-- Admin access removed from user page – now only via hidden URL -->
+      <div class="mt-6 text-center text-[0.6rem] text-gray-300">🔒 Admin area protected</div>
     </div>
   </div>
 
@@ -186,30 +183,52 @@
     </div>
   </div>
 
-  <!-- ====== ADMIN DASHBOARD (standalone window) ====== -->
-  <div id="window-admin" class="window-container max-w-5xl mx-auto">
-    <div class="window-card p-8">
-      <div class="flex justify-between items-center border-b pb-4 mb-6">
-        <h2 class="text-3xl font-bold text-emerald-900 flex items-center gap-3"><i class="fas fa-gavel text-emerald-700"></i> Admin Dashboard</h2>
-        <button onclick="showWindow('home')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times-circle text-2xl"></i></button>
+  <!-- ====== DONATE WINDOW ====== -->
+  <div id="window-donate" class="window-container max-w-2xl mx-auto">
+    <div class="window-card p-8 donation-card">
+      <div class="flex items-center gap-3 mb-2">
+        <i class="fas fa-heart text-red-500 text-3xl"></i>
+        <h2 class="text-3xl font-bold text-emerald-900">Support FarmTrust</h2>
       </div>
-      <div class="grid md:grid-cols-4 gap-4">
-        <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100"><span class="text-sm font-medium text-amber-700">Pending KYC</span><div class="text-3xl font-bold text-amber-600">4</div><button class="mt-2 bg-amber-600 text-white px-4 py-1 rounded-full text-sm">Review all</button></div>
-        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100"><span class="text-sm font-medium text-emerald-700">Active sellers</span><div class="text-3xl font-bold text-emerald-700">12</div><button class="mt-2 bg-emerald-600 text-white px-4 py-1 rounded-full text-sm">Manage</button></div>
-        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100"><span class="text-sm font-medium text-blue-700">Adverts</span><div class="text-3xl font-bold text-blue-600">8</div><button class="mt-2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm">Moderate</button></div>
-        <div class="bg-red-50 p-4 rounded-2xl border border-red-100"><span class="text-sm font-medium text-red-700">Reports</span><div class="text-3xl font-bold text-red-500">2</div><button class="mt-2 bg-red-600 text-white px-4 py-1 rounded-full text-sm">View</button></div>
-      </div>
-      <!-- recent sellers -->
-      <div class="mt-8">
-        <h4 class="font-semibold text-gray-700 mb-3">Recent registrations</h4>
-        <div class="space-y-2">
-          <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl"><span><span class="font-medium">Chidi Farms</span> <span class="text-xs text-gray-400">2h ago</span></span><span class="text-amber-600 text-sm">pending</span><button class="bg-emerald-600 text-white px-3 py-1 rounded text-xs">Approve</button><button class="bg-red-100 text-red-600 px-3 py-1 rounded text-xs">Reject</button></div>
-          <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl"><span><span class="font-medium">Green Harvest</span> <span class="text-xs text-gray-400">5h ago</span></span><span class="text-emerald-600 text-sm">approved</span><button class="bg-gray-200 text-gray-600 px-3 py-1 rounded text-xs">Remove</button></div>
-          <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl"><span><span class="font-medium">Palm Oil Co.</span> <span class="text-xs text-gray-400">1d ago</span></span><span class="text-amber-600 text-sm">pending</span><button class="bg-emerald-600 text-white px-3 py-1 rounded text-xs">Approve</button><button class="bg-red-100 text-red-600 px-3 py-1 rounded text-xs">Reject</button></div>
+      <p class="text-gray-700 mb-6">Help us build a secure, verified marketplace for farmers and buyers. Your donation keeps the platform running and scam-free.</p>
+      
+      <div class="bg-white/70 p-6 rounded-2xl shadow-sm">
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <button class="donate-amount bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold py-3 rounded-xl transition" data-amount="10">$10</button>
+          <button class="donate-amount bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold py-3 rounded-xl transition" data-amount="25">$25</button>
+          <button class="donate-amount bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold py-3 rounded-xl transition" data-amount="50">$50</button>
+          <button class="donate-amount bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold py-3 rounded-xl transition" data-amount="100">$100</button>
+          <button class="donate-amount bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold py-3 rounded-xl transition" data-amount="250">$250</button>
+          <button class="donate-amount bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold py-3 rounded-xl transition" data-amount="500">$500</button>
         </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700">Custom amount</label>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-gray-600 font-bold">$</span>
+            <input type="number" id="customDonation" min="1" step="1" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Enter amount" />
+          </div>
+        </div>
+        <button onclick="processDonation()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-xl text-lg shadow-md transition flex items-center justify-center gap-2">
+          <i class="fas fa-heart"></i> Donate Now
+        </button>
+        <p class="text-xs text-gray-500 mt-4 text-center"><i class="fas fa-lock mr-1"></i> Secure payment via Stripe / PayPal</p>
       </div>
-      <p class="text-xs text-gray-400 mt-6 border-t pt-4"><i class="fas fa-database mr-1"></i> PostgreSQL · Prisma · Cloudinary storage</p>
+
+      <div class="mt-6 text-sm text-gray-600 bg-white/50 p-4 rounded-xl">
+        <h4 class="font-semibold text-emerald-800">💚 Why donate?</h4>
+        <ul class="list-disc list-inside space-y-1 mt-2">
+          <li>Keep the platform free for farmers</li>
+          <li>Fund KYC verification and security</li>
+          <li>Support rural farming communities</li>
+          <li>Transparent use of funds</li>
+        </ul>
+      </div>
     </div>
+  </div>
+
+  <!-- ====== ADMIN DASHBOARD (hidden – not shown to users) ====== -->
+  <div id="window-admin" class="window-container max-w-5xl mx-auto" style="display: none !important;">
+    <!-- This is completely hidden from users – only accessible via secret navigation -->
   </div>
 
 </main>
@@ -219,29 +238,106 @@
   <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
     <div class="flex items-center gap-2"><i class="fas fa-seedling text-emerald-300"></i> <span class="font-bold">FarmTrust</span> <span class="opacity-60">· verified marketplace</span></div>
     <div class="flex gap-4 text-emerald-300"><i class="fab fa-github"></i><i class="fab fa-twitter"></i><i class="fab fa-whatsapp"></i></div>
-    <div class="opacity-60">© 2026 · KYC secure</div>
+    <div class="opacity-60">© 2026 · KYC secure · <i class="fas fa-heart text-red-400"></i> donations</div>
   </div>
 </footer>
 
+<!-- ====== HIDDEN ADMIN ACCESS (via double-click on footer) ====== -->
 <script>
   // window switching
   function showWindow(id) {
     document.querySelectorAll('.window-container').forEach(w => w.classList.remove('active'));
     const target = document.getElementById('window-' + id);
-    if (target) target.classList.add('active');
-    // if admin, show admin window
-    if (id === 'admin') {
-      document.getElementById('window-admin').classList.add('active');
+    if (target) {
+      // if admin, only allow if secret condition
+      if (id === 'admin') {
+        // hidden: only via secret click
+        if (!window.adminAccess) {
+          alert('🔒 Admin area is restricted.');
+          return;
+        }
+      }
+      target.classList.add('active');
     }
-    // close admin panel inside login if open
-    const adminPanel = document.getElementById('adminPanel');
-    if (adminPanel) adminPanel.classList.add('hidden');
   }
 
-  // toggle admin panel (inside login)
-  function toggleAdmin() {
-    const panel = document.getElementById('adminPanel');
-    if (panel) panel.classList.toggle('hidden');
+  // donation amount presets
+  document.querySelectorAll('.donate-amount').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const amount = this.dataset.amount;
+      document.getElementById('customDonation').value = amount;
+      document.querySelectorAll('.donate-amount').forEach(b => b.classList.remove('bg-emerald-300'));
+      this.classList.add('bg-emerald-300');
+    });
+  });
+
+  function processDonation() {
+    const input = document.getElementById('customDonation');
+    const amount = parseFloat(input.value);
+    if (!amount || amount < 1) {
+      alert('Please enter a valid donation amount.');
+      return;
+    }
+    alert(`❤️ Thank you for your donation of $${amount.toFixed(2)}!\n\nYour support helps keep FarmTrust secure and free for farmers.`);
+    input.value = '';
+    document.querySelectorAll('.donate-amount').forEach(b => b.classList.remove('bg-emerald-300'));
+  }
+
+  // ===== SECRET ADMIN ACCESS =====
+  // Double-click on the footer "© 2026" text to reveal admin
+  let clickCount = 0;
+  document.querySelector('footer .opacity-60')?.addEventListener('dblclick', function(e) {
+    e.preventDefault();
+    clickCount++;
+    if (clickCount >= 1) {
+      window.adminAccess = true;
+      // show admin window
+      document.getElementById('window-admin').style.display = 'block';
+      document.getElementById('window-admin').classList.add('active');
+      // hide other windows
+      document.querySelectorAll('.window-container').forEach(w => {
+        if (w.id !== 'window-admin') w.classList.remove('active');
+      });
+      // populate admin content dynamically
+      renderAdmin();
+      alert('🔐 Admin dashboard activated.');
+      clickCount = 0;
+    }
+  });
+
+  function renderAdmin() {
+    const adminDiv = document.getElementById('window-admin');
+    adminDiv.innerHTML = `
+      <div class="window-card p-8">
+        <div class="flex justify-between items-center border-b pb-4 mb-6">
+          <h2 class="text-3xl font-bold text-emerald-900 flex items-center gap-3"><i class="fas fa-gavel text-emerald-700"></i> Admin Dashboard</h2>
+          <button onclick="closeAdmin()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times-circle text-2xl"></i></button>
+        </div>
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100"><span class="text-sm font-medium text-amber-700">Pending KYC</span><div class="text-3xl font-bold text-amber-600">4</div><button class="mt-2 bg-amber-600 text-white px-4 py-1 rounded-full text-sm">Review all</button></div>
+          <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100"><span class="text-sm font-medium text-emerald-700">Active sellers</span><div class="text-3xl font-bold text-emerald-700">12</div><button class="mt-2 bg-emerald-600 text-white px-4 py-1 rounded-full text-sm">Manage</button></div>
+          <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100"><span class="text-sm font-medium text-blue-700">Adverts</span><div class="text-3xl font-bold text-blue-600">8</div><button class="mt-2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm">Moderate</button></div>
+          <div class="bg-red-50 p-4 rounded-2xl border border-red-100"><span class="text-sm font-medium text-red-700">Reports</span><div class="text-3xl font-bold text-red-500">2</div><button class="mt-2 bg-red-600 text-white px-4 py-1 rounded-full text-sm">View</button></div>
+        </div>
+        <div class="mt-8">
+          <h4 class="font-semibold text-gray-700 mb-3">Recent registrations</h4>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl"><span><span class="font-medium">Chidi Farms</span> <span class="text-xs text-gray-400">2h ago</span></span><span class="text-amber-600 text-sm">pending</span><button class="bg-emerald-600 text-white px-3 py-1 rounded text-xs">Approve</button><button class="bg-red-100 text-red-600 px-3 py-1 rounded text-xs">Reject</button></div>
+            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl"><span><span class="font-medium">Green Harvest</span> <span class="text-xs text-gray-400">5h ago</span></span><span class="text-emerald-600 text-sm">approved</span><button class="bg-gray-200 text-gray-600 px-3 py-1 rounded text-xs">Remove</button></div>
+            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl"><span><span class="font-medium">Palm Oil Co.</span> <span class="text-xs text-gray-400">1d ago</span></span><span class="text-amber-600 text-sm">pending</span><button class="bg-emerald-600 text-white px-3 py-1 rounded text-xs">Approve</button><button class="bg-red-100 text-red-600 px-3 py-1 rounded text-xs">Reject</button></div>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 mt-6 border-t pt-4"><i class="fas fa-database mr-1"></i> PostgreSQL · Prisma · Cloudinary storage</p>
+        <button onclick="closeAdmin()" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full text-sm transition">Close Admin</button>
+      </div>
+    `;
+  }
+
+  function closeAdmin() {
+    document.getElementById('window-admin').style.display = 'none';
+    document.getElementById('window-admin').classList.remove('active');
+    window.adminAccess = false;
+    showWindow('home');
   }
 
   // show home by default
